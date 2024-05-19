@@ -4,15 +4,31 @@ import { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import errorMiddleware from './MiddleWare/error.middleware';
 import AppError from './Utils/appError';
+import userRouter from './Router/user.Router';
+import session from 'express-session';
+
+
 
 dotenv.config();
 
 
 const app: Application = express();
 
+//Use the session
+app.use(session({
+    secret: 'SECRET', 
+    resave: false,
+    saveUninitialized: false
+}));
+
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+
+//userRoute
+app.use('/weave',userRouter)
+
 
 // Default route
 app.use('/', (req: Request, res: Response, next: NextFunction) => {
