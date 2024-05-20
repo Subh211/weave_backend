@@ -6,7 +6,7 @@ import errorMiddleware from './MiddleWare/error.middleware';
 import AppError from './Utils/appError';
 import userRouter from './Router/user.Router';
 import session from 'express-session';
-
+import cookieParser from "cookie-parser";
 
 
 dotenv.config();
@@ -22,9 +22,11 @@ app.use(session({
 }));
 
 // Middleware
+app.use(cookieParser())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Routes
 
 //userRoute
 app.use('/weave',userRouter)
@@ -42,7 +44,6 @@ app.use('/', (req: Request, res: Response, next: NextFunction) => {
     }
 });
 
-// Routes
 
 //if page not found
 app.all('*',(req: Request, res: Response) => {

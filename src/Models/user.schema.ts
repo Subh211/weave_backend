@@ -4,10 +4,14 @@ import JWT from "jsonwebtoken";
 import crypto from 'crypto';
 
 
+//Interface named IUser for defining schema
 interface IUser extends Document {
-    jwtToken(): unknown;
+    jwtToken(): string;
+    comparePassword(plainPassword: string): Promise<boolean>;
+    generateEmailRegisterToken(): Promise<string>;
+    generateResetPasswordToken(): Promise<string>;
     googleId?: string;
-    displayName?: string;
+    displayName: string;
     email: string;
     photoURL?: {
         public_id: string;
@@ -21,8 +25,12 @@ interface IUser extends Document {
     bio?: string;
     emailRegistrationToken?: string;
     emailRegistrationExpiry?: number;
+    resetPasswordToken?:string;
+    resetPasswordExpiry?:number;
 }
 
+
+//Defining schema for creating user
 const userSchema: Schema<IUser> = new Schema(
     {
         googleId: String,
@@ -48,21 +56,29 @@ const userSchema: Schema<IUser> = new Schema(
             default: "USER",
         },
         bio: String,
-        joinedDate: Date
+        joinedDate: Date,
+        emailRegistrationToken: String,
+        emailRegistrationExpiry: Date,
+        resetPasswordToken: String,
+        resetPasswordExpiry: Date
     },
     { timestamps: true }
 );
 
-userSchema.pre<IUser>('save', async function (next) {
-    if (!this.isModified('password')) {
-        next();
+//Pre method before user gets created
+userSchema.pre("save", async function (next) {
+    //if the password is not modified
+    if (!this.isModified("password")) {
+      return next();
     }
-
+  
     this.password = await bcrypt.hash(this.password, 10);
-    next();
-});
+  });
 
-const User = model<IUser>("User", userSchema);
+// Method to compare password
+userSchema.methods.comparePassword = async function (plainPassword: string): Promise<boolean> {
+    return await bcrypt.compare(plainPassword, this.password);
+};
 
 
 //JWTtoken generation for login purpose
@@ -76,18 +92,39 @@ export const jwtToken = (user: IUser): string => {
 
 
 //Token generation for registration through email purpose
-export const emailRegisterTokenGenerator = async (user:IUser): Promise<string> => {
+userSchema.methods.generateEmailRegisterToken = async function (): Promise<string> {
     const resetToken = crypto.randomBytes(20).toString('hex');
 
-        user.emailRegistrationToken = crypto
+    this.emailRegistrationToken = crypto
         .createHash('sha256')
         .update(resetToken)
-        .digest('hex')
+        .digest('hex');
 
-        user.emailRegistrationExpiry = Date.now() + 15*60*1000;
+    this.emailRegistrationExpiry = Date.now() + 15 * 60 * 1000;
 
-        return resetToken;
-}
+    await this.save(); // Save the user document with the new token
+
+    return resetToken;
+};
+
+//Token generation for reset password purpose
+userSchema.methods.generateResetPasswordToken = async function (): Promise<string> {
+    const resetPassToken = crypto.randomBytes(20).toString('hex');
+
+    this.resetPasswordToken = crypto
+        .createHash('sha256')
+        .update(resetPassToken)
+        .digest('hex');
+
+    this.resetPasswordExpiry = Date.now() + 15 * 60 * 1000;
+
+    await this.save(); // Save the user document with the new token
+
+    return resetPassToken;
+};
+
+//Creating the user by userSchema
+const User = model<IUser>("User", userSchema);
 
 export default User ;
 export { IUser };
