@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { createPost, getOnePost, getPost } from "../Controller/post.controller";
+import upload from "../MiddleWare/multer.middleware";
+
 
 const postRouter = Router();
 
@@ -11,7 +13,7 @@ postRouter
 postRouter
   .route("/:userId")
   .get(getPost)
-  .post(createPost);
+  .post(upload.single('photoURL'),createPost);
 
   postRouter
   .route("/postDetails/:userId")

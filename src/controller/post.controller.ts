@@ -1,7 +1,9 @@
-import { NextFunction, Request, Response  } from "express";
+import { NextFunction, Request, Response } from "express";
 import Post from "../Models/post.schema";
 import User from "../Models/user.schema";
 import AppError from "../Utils/appError";
+import { v2 as cloudinaryV2 } from 'cloudinary';
+import fs from 'fs/promises';
 
 interface CreatePostRequest extends Request {
     params: {
@@ -10,23 +12,19 @@ interface CreatePostRequest extends Request {
     query: {
         postId: string;
     };
+    file?: Express.Multer.File;
     body: {
-        image?: {
-            public_id: string;
-            secure_url: string;
-        };
         caption: string;
     };
 }
 
-
-
-// Create Post function
 const createPost = async (req: CreatePostRequest, res: Response, next: NextFunction) => {
 
     try {
         const {userId} = req.params
         const { caption } = req.body;
+
+        console.log(req.body.caption)
 
         // Check if the user exists
         const user = await User.findById(userId);
@@ -46,6 +44,8 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
                 }]
             });
         }
+
+        
 
         //if there alreay a post by that userId 
          post.posts.push({
@@ -67,6 +67,7 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
         return next(new AppError("Internal server error", 500)) as unknown as Response;
     }
 };
+
 
 //get every post of that user
 const getPost = async (req: CreatePostRequest, res: Response, next: NextFunction) => {
