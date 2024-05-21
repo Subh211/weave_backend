@@ -7,6 +7,7 @@ import AppError from './Utils/appError';
 import userRouter from './Router/user.router';
 import session from 'express-session';
 import cookieParser from "cookie-parser";
+import postRouter from './Router/post.router';
 
 
 //dotenv configuration
@@ -30,7 +31,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Routes---
 
 //userRoute
-app.use('/weave',userRouter)
+app.use('/api/v1/user',userRouter)
+app.use('/api/v1/post',postRouter)
 
 
 // Default route

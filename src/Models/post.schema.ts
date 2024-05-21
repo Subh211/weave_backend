@@ -1,77 +1,79 @@
 import { Schema, Document, model } from "mongoose";
 
-
-interface Post extends Document {
-    image?: {
-        public_id : string,
-        secure_url : string
-    };
-    caption : string;
-    comments : Array<{
-        userId : string,
-        userName : string,
-        comment : string
-    }> ;
-    like : Array <{
-        userId : string;
-        userName : string;
-        isLiked : boolean
-    }>
+interface IPost extends Document {
+    userId: Schema.Types.ObjectId;
+    posts: Array<{
+        image?: {
+            public_id: string;
+            secure_url: string;
+        };
+        caption?: string;
+        comments?: Array<{
+            userId?: string;
+            userName?: string;
+            comment?: string;
+        }>;
+        likes?: Array<{
+            userId?: string;
+            userName?: string;
+            isLiked?: boolean;
+        }>;
+    }>;
 }
 
-const postSchema: Schema<Post> = new Schema(
+const postSchema: Schema<IPost> = new Schema(
     {
-        image : {
-            public_id : {
-                type : String,
-                required : true
-            } ,
-            secure_url : {
-                type : String,
-                required : true
-            } 
-        } ,
-        caption : {
-            type : String,
-            required : true
-        } ,
-        comments : [
+        userId: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            required: [true, "UserId is required"],
+        },
+        posts: [
             {
-                userId : {
-                    type : String,
-                    required : true
-                } ,
-                userName : {
-                    type : String,
-                    required : true
-                } ,
-                isLiked : {
-                    type : Boolean,
-                    required : true
-                }
-            }
-        ] ,
-        like : [
-            {
-                userId : {
-                    type : String,
-                    required : true
-                } ,
-                userName : {
-                    type : String,
-                    required : true
-                } ,
-                comment : {
-                    type : String,
-                    required : true
-                }
-            }
-        ]
-        
+                image: {
+                    public_id: {
+                        type: String,
+                    },
+                    secure_url: {
+                        type: String,
+                    },
+                },
+                caption: {
+                    type: String,
+                },
+                comments: [
+                    {
+                        userId: {
+                            type: String,
+                        },
+                        userName: {
+                            type: String,
+                        },
+                        comment: {
+                            type: String,
+                        },
+                    },
+                ],
+                likes: [
+                    {
+                        userId: {
+                            type: String,
+                        },
+                        userName: {
+                            type: String,
+                        },
+                        isLiked: {
+                            type: Boolean,
+                        },
+                    },
+                ],
+            },
+        ],
     },
     { timestamps: true }
 );
 
-const PostModel = model<Post>("Post", postSchema);
+const Post = model<IPost>("Post", postSchema);
 
-export { PostModel, Post };
+export default Post;
+export { IPost };

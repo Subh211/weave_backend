@@ -348,13 +348,10 @@ const signin = async (req: Request, res: Response, next: NextFunction): Promise<
             data: user
         });
     }   
-    catch (error) {
+    catch (error: any) {
         //Error handling for internal server error
-        if (error instanceof Error) {
-            next(new AppError(`Internal server error: ${error.message}`, 500));
-        } else {
-            next(new AppError("Internal server error", 500));
-        }
+        console.error("Error creating post:", error.message);
+        return next(new AppError("Internal server error", 500)) as unknown as Response;
     }
 };
 
