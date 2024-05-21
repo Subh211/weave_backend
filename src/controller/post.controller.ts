@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import Post from "../Models/post.schema";
 import User from "../Models/user.schema";
 import AppError from "../Utils/appError";
-import { v2 as cloudinaryV2 } from 'cloudinary';
+import cloudinary from "cloudinary";
 import fs from 'fs/promises';
 
 interface CreatePostRequest extends Request {
@@ -24,7 +24,7 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
         const {userId} = req.params
         const { caption } = req.body;
 
-        console.log(req.body.caption)
+        // console.log(req.file)
 
         // Check if the user exists
         const user = await User.findById(userId);
@@ -44,12 +44,40 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
                 }]
             });
         }
+    // run only if user send a file
+    if (req.file && caption) {
+            try {
+                const file = await cloudinary.v2.uploader.upload(req.file.path, {
+                    folder: "server",
+                    gravity: "center",
+                    crop: "fill",
+                });
 
+                // console.log(`../uploads/${req.file.filename}`);     
+                if (file) {
+                    post.posts[post.posts.length - 1].image = {
+                        public_id: file.public_id,
+                        secure_url: file.secure_url,
+                    };
+                    // Save the post to the database
+                    await post.save();
+
+
+                    // Delete the uploaded file after save completes in Cloudinary
+                    await fs.rm(`./uploads/${req.file.filename}`);
+
+                }
+            } catch (error: any) {
+                console.log(error.message);
+                return next(new AppError("Something went wrong while uploading the file", 400));
+            }
+
+        }
+  
         
-
         //if there alreay a post by that userId 
          post.posts.push({
-                caption,
+            caption,   
             });
         
 

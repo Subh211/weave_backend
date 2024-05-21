@@ -13,7 +13,7 @@ postRouter
 postRouter
   .route("/:userId")
   .get(getPost)
-  .post(upload.single('photoURL'),createPost);
+  .post(upload.single('image'),createPost);
 
   postRouter
   .route("/postDetails/:userId")
