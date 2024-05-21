@@ -4,14 +4,15 @@ import { Request, Response } from 'express';
 import dotenv from 'dotenv';
 import errorMiddleware from './MiddleWare/error.middleware';
 import AppError from './Utils/appError';
-import userRouter from './Router/user.Router';
+import userRouter from './Router/user.router';
 import session from 'express-session';
 import cookieParser from "cookie-parser";
 
 
+//dotenv configuration
 dotenv.config();
 
-
+//Making app with express()
 const app: Application = express();
 
 //Use the session
@@ -26,7 +27,7 @@ app.use(cookieParser())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Routes
+// Routes---
 
 //userRoute
 app.use('/weave',userRouter)
@@ -45,12 +46,13 @@ app.use('/', (req: Request, res: Response, next: NextFunction) => {
 });
 
 
-//if page not found
+//If page not found route
 app.all('*',(req: Request, res: Response) => {
     res.status(404).send('OOPS! 404 NOT FOUND');
 })
 
-
+//Making the app to use errorMiddleware
 app.use(errorMiddleware)
 
+//Exporting the app
 export default app;

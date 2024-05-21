@@ -126,6 +126,7 @@ userSchema.methods.generateResetPasswordToken = async function (): Promise<strin
 //Creating the user by userSchema
 const User = model<IUser>("User", userSchema);
 
+//Exporting user and { IUser }
 export default User ;
 export { IUser };
 

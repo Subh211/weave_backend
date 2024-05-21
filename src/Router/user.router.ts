@@ -25,7 +25,7 @@ userRouter.post('/register', (req: Request & { session: session.Session }, res: 
 
 
 // Route for setting password
-userRouter.post('/password', (req: Request & { session: session.Session }, res: Response, next: NextFunction) => {
+userRouter.post('/password/:emailToken', (req: Request & { session: session.Session }, res: Response, next: NextFunction) => {
     // Access the email property from the session
     const email = req.session.email;
     if (!email) {
@@ -82,4 +82,5 @@ userRouter.put('/update-user', jwtAuth , upload.single('photoURL') , (req: Reque
 });
 
 
+//Exporting userRouter
 export default userRouter;

@@ -77,7 +77,7 @@ const registerUserByEmail = async (req: Request & { session: session.Session }, 
         const emailToken = await user.generateEmailRegisterToken();
 
         // URL for email registration
-        const registrationWithEmailURL = `http://localhost:${process.env.PORT}/register-email/${emailToken}`;
+        const registrationWithEmailURL = `http://localhost:${process.env.PORT}/weave/password/${emailToken}`;
 
         // Define subject and message for the Mail
         const subject = "Register with Email";
@@ -86,7 +86,6 @@ const registerUserByEmail = async (req: Request & { session: session.Session }, 
         // Send the email
         try {
             await sendEmail(subject, message, email);
-            console.log(registrationWithEmailURL); // Logging for testing purposes
 
             return res.status(200).json({
                 success: true,
@@ -118,6 +117,26 @@ const registerUserByEmail = async (req: Request & { session: session.Session }, 
 const passwordByUser = async (req: Request & { session: session.Session }, res: Response, next: NextFunction): Promise<Response | void> => {
    
     try {
+        //Get the emailToken from params
+        const { emailToken } = req.params;
+
+        //Hash the emailToken to validate it with dataBase 
+        const emailTokenValidator = await crypto
+        .createHash('sha256')
+        .update(emailToken)
+        .digest('hex')
+
+        //Find the user based on the generated token
+        const user: IUser | null = await User.findOne({
+            emailRegistrationToken: emailTokenValidator,
+            emailRegistrationExpiry: { $gt: Date.now() }
+        });
+        
+        //If user does not exists
+        if ( !user ) {
+            return next(new AppError("User not found", 400)) as unknown as Response;
+        }
+
         //Get password and confirm password from body
         const { password, confirmPassword } = req.body;
 
@@ -142,10 +161,10 @@ const passwordByUser = async (req: Request & { session: session.Session }, res: 
         }
 
         // Find user by email
-        let user: IUser | null = await User.findOne({ email });
+        let findUserByEmail: IUser | null = await User.findOne({ email });
 
         // If user not found
-        if (!user) {
+        if (!findUserByEmail) {
             return next(new AppError("User not found", 404)) as unknown as Response;
         }
 
@@ -155,10 +174,10 @@ const passwordByUser = async (req: Request & { session: session.Session }, res: 
         }
 
         // Set the password of the user
-        user.password=password;
+        findUserByEmail.password=password;
 
         // Save user
-        await user.save();
+        await findUserByEmail.save();
 
         // Return success response
         return res.status(200).json({
@@ -486,6 +505,15 @@ const resetPassword = async ( req: Request , res : Response , next: NextFunction
 
         }
 
+        //Regex for password
+        const passwordRegex: RegExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,16})/;
+
+        //Validate the regex with user given input
+        if (!passwordRegex.test(password)) {
+            return next(new AppError("Password should be between 8-16 characters long and should contain atleast one uppercase letter,one lowercase letter and one symbol ", 400)) as unknown as Response;
+
+        }
+
         //Create a token for the new password
         const resetPasswordToken = await crypto
         .createHash('sha256')
@@ -552,6 +580,15 @@ const changePassword = async ( req: Request , res : Response , next: NextFunctio
             return next(new AppError("Your old and new password can not be same", 400)) as unknown as Response;
         }
 
+        //Regex for password
+        const passwordRegex: RegExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,16})/;
+
+        //Validate the regex with user given input
+        if (!passwordRegex.test(newPassword)) {
+            return next(new AppError("Password should be between 8-16 characters long and should contain atleast one uppercase letter,one lowercase letter and one symbol ", 400)) as unknown as Response;
+
+        }
+
         //Find the user by user id and also select the password field
         const user = await User.findById(userId).select('+password')
 
@@ -612,6 +649,14 @@ const updateUser = async ( req: Request , res : Response , next: NextFunction ) 
         //If user dont give the username
         if ( !userName ) {
             return next(new AppError("Please enter your new user name", 400)) as unknown as Response;
+        }
+
+        //Regex for user name
+        const usernameRegex: RegExp = /^[a-z_-]+$/;
+
+        //Validate the regex with user given input
+        if (!usernameRegex.test(userName)) {
+            return next(new AppError("Username should be in small letter & contains only _ and -", 400)) as unknown as Response;
         }
 
         //Find the user by user id
@@ -686,4 +731,5 @@ const updateUser = async ( req: Request , res : Response , next: NextFunction ) 
 }
 
 
+//Exporting user functions
 export { registerUserByEmail, passwordByUser , userNameAndUserPicture , signin , userDetails , logOut , forgetPassword , resetPassword , changePassword , updateUser };

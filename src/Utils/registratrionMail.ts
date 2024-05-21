@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 
+//Defining the sendMail function
 const sendEmail = async function (subject: string, message: string, email: string): Promise<void> {
   try {
     // Create reusable transporter object using the default SMTP transport
@@ -25,5 +26,5 @@ const sendEmail = async function (subject: string, message: string, email: strin
   }
 };
 
-
+//Exporting sendEmail
 export default sendEmail;

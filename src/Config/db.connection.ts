@@ -4,12 +4,15 @@ import dotenv from 'dotenv';
 //dotenv configuration
 dotenv.config();
 
+//Get coonection key from process.env
 const { MONGODB_URI } = process.env;
 
+//If connection key not present throw an error
 if (!MONGODB_URI) {
     throw new Error("MONGODB_URI is not defined in .env file");
 }
 
+//Definng connectDB function to connect with database
 const connectDB = async () => {
     try {
         await mongoose.connect(MONGODB_URI);
@@ -20,4 +23,5 @@ const connectDB = async () => {
     }
 };
 
+//Exporting connectDB function
 export default connectDB;
