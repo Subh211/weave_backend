@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createPost, getOnePost, getPost } from "../Controller/post.controller";
+import { createPost, deleteOnePost, getOnePost, getPost, updateOnePost } from "../controller/post.controller";
 import upload from "../MiddleWare/multer.middleware";
 
 
@@ -15,8 +15,16 @@ postRouter
   .get(getPost)
   .post(upload.single('image'),createPost);
 
-  postRouter
+postRouter
   .route("/postDetails/:userId")
   .get(getOnePost)
+
+postRouter
+  .route("/updatePost/:userId")
+  .post(updateOnePost)
+
+postRouter
+  .route("/deletepost/:userId")
+  .post(deleteOnePost)
 
 export default postRouter;

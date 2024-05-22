@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { IRegistrationRequest , MulterFilesRequest , changePassword, forgetPassword, logOut, passwordByUser, registerUserByEmail, resetPassword, signin, updateUser, userDetails, userNameAndUserPicture }from "../controller/user.controller";
+import { IRegistrationRequest , MulterFilesRequest , changePassword, deleteUser, forgetPassword, logOut, passwordByUser, registerUserByEmail, resetPassword, signin, updateUser, userDetails, userNameAndUserPicture }from "../controller/user.controller";
 import upload from "../MiddleWare/multer.middleware";
 import session from 'express-session';
 import { jwtAuth } from "../MiddleWare/jwtAuth";
@@ -81,6 +81,11 @@ userRouter.put('/update-user', jwtAuth , upload.single('photoURL') , (req: Reque
     updateUser(req , res, next);
 });
 
+
+//Delete the user
+userRouter.delete('/delete', jwtAuth , (req: Request, res: Response, next: NextFunction) => {
+    deleteUser(req,res,next);
+})
 
 //Exporting userRouter
 export default userRouter;

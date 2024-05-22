@@ -4,7 +4,7 @@ import AppError from '../Utils/appError';
 import emailValidator from 'email-validator';
 import sendEmail from '../Utils/registratrionMail';
 import session from 'express-session';
-import bcrypt from 'bcrypt';
+import Post from "../Models/post.schema";
 import { v2 as cloudinaryV2 } from 'cloudinary';
 import fs from 'fs/promises';
 import crypto from 'crypto';
@@ -77,7 +77,7 @@ const registerUserByEmail = async (req: Request & { session: session.Session }, 
         const emailToken = await user.generateEmailRegisterToken();
 
         // URL for email registration
-        const registrationWithEmailURL = `http://localhost:${process.env.PORT}/weave/password/${emailToken}`;
+        const registrationWithEmailURL = `http://localhost:${process.env.PORT}/api/v1/user/password/${emailToken}`;
 
         // Define subject and message for the Mail
         const subject = "Register with Email";
@@ -447,7 +447,7 @@ const forgetPassword = async ( req: Request , res : Response , next: NextFunctio
         console.log(passwordToken)
 
         //Generate link for forget password
-        const resetPasswordURL = `http://localhost:${process.env.PORT}/weave/reset-password/${passwordToken}`;
+        const resetPasswordURL = `http://localhost:${process.env.PORT}/api/v1/user/reset-password/${passwordToken}`;
 
         // Define subject and message for the Mail
         const subject = "Reset your password";
@@ -728,5 +728,93 @@ const updateUser = async ( req: Request , res : Response , next: NextFunction ) 
 }
 
 
+//Delete user function
+const deleteUser = async ( req: Request , res : Response , next: NextFunction ) : Promise <Response | void> => {
+
+    try {
+        //Get userId from jwtAuth middleware
+        const userId = req.user?.id;
+
+        //Find the user based on the userId
+        let user = await User.findById (userId).select('+password');
+
+        //Get password from the body
+        const { password } = req.body;
+
+        //If no password given---Throw an error
+        if (!password) {
+            return next(new AppError("You must enter your password to delete account", 400)) as unknown as Response;
+        }
+
+        //Check if the given password is valid or not
+        const isPasswordValid = await user?.comparePassword(password);
+
+        //If the password is not valid---throw an error
+        if (!isPasswordValid) {
+            return next(new AppError("Your password is not valid", 400)) as unknown as Response;
+        }
+
+        //Find the posts of the user based on userId
+        const post = await Post.findOne({userId});
+
+        //Declare posts as all posts of the user
+        let posts = post?.posts;
+
+        //Delete each image from the posts
+        if (typeof posts === 'object' && posts !== null) {
+            for (const key in posts) {
+              if (posts.hasOwnProperty(key)) {
+                let photoId = posts[key].image?.public_id;
+      
+                if (photoId) {
+                  await cloudinaryV2.uploader.destroy(photoId);
+                }
+              }
+            }
+        }
+
+        //Delete the post collection from the database
+        await Post.findOneAndDelete({userId})
+
+        //Get the picture public_id of profile pic 
+        let profilePictureLink = user?.photoURL?.public_id;
+
+        //Delete the profile pic
+        if (profilePictureLink) {
+            await cloudinaryV2.uploader.destroy(profilePictureLink);
+
+        }
+
+        //Delete the user
+        await User.findByIdAndDelete(userId);
+
+        return res.status(200).json({
+            success: true,
+            message: "User and associated data deleted successfully",
+        })
+
+
+    } catch (error) {
+        // Internal server error handling
+        if (error instanceof Error) {
+            next(new AppError(`Internal server error: ${error.message}`, 500));
+        } else {
+            next(new AppError("Internal server error", 500));
+        }
+    }
+
+}
+
+
 //Exporting user functions
-export { registerUserByEmail, passwordByUser , userNameAndUserPicture , signin , userDetails , logOut , forgetPassword , resetPassword , changePassword , updateUser };
+export { registerUserByEmail, 
+        passwordByUser , 
+        userNameAndUserPicture , 
+        signin , 
+        userDetails , 
+        logOut , 
+        forgetPassword , 
+        resetPassword , 
+        changePassword , 
+        updateUser ,
+        deleteUser};
