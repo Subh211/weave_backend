@@ -5,6 +5,7 @@ import JWT from 'jsonwebtoken';
 interface JwtPayload {
     id: string;
     email: string;
+    displayName: string;
 }
 
 // Extend the Request interface to include the user property
@@ -33,7 +34,7 @@ const jwtAuth = (req: Request, res: Response, next: NextFunction): void => {
         const payload = JWT.verify(token, process.env.SECRET as string) as JwtPayload;
 
         //Injecting id and email to req.user
-        req.user = { id: payload.id, email: payload.email };
+        req.user = { id: payload.id, email: payload.email, displayName: payload.displayName };
     } catch (error) {
         res.status(400).json({
             success: false,

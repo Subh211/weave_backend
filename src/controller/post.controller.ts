@@ -4,11 +4,14 @@ import User from "../Models/user.schema";
 import AppError from "../Utils/appError";
 import fs from 'fs/promises';
 import { v2 as cloudinaryV2 } from 'cloudinary';
+import mongoose from 'mongoose';
+import { Console } from "console";
+
 
 
 interface CreatePostRequest extends Request {
     params: {
-        userId: string;
+        friendId: string;
     };
     query: {
         postId: string;
@@ -16,6 +19,7 @@ interface CreatePostRequest extends Request {
     file?: Express.Multer.File;
     body: {
         caption: string;
+        comment: string
     };
 }
 
@@ -163,7 +167,7 @@ const updateOnePost = async (req: Request, res: Response, next: NextFunction) =>
     try {
       //Get caption from the body  
       const { caption } = req.body;
-      //get userId from the params
+      //get userId from the jwtAuth middleware
       const  userId  = req.user?.id;
       //Get postId from the query
       const { postId } = req.query;
@@ -197,7 +201,7 @@ const updateOnePost = async (req: Request, res: Response, next: NextFunction) =>
 //delete one particular post of that user
 const deleteOnePost = async (req: CreatePostRequest, res: Response, next: NextFunction) => {
         try {
-            //Get userId from the params
+            //Get userId from the jwtAuth middleware
             const userId = req.user?.id
             //Get postId from the query
             const {postId} = req.query
@@ -241,12 +245,280 @@ const deleteOnePost = async (req: CreatePostRequest, res: Response, next: NextFu
             }
 }
 
+
+//like a post
+const likePost = async (req: CreatePostRequest, res: Response, next: NextFunction) => {
+    try {
+    //get userid from the jwtAuth middleware
+    const userId = req.user?.id;
+    //get friendid from the params
+    const { friendId } = req.params;
+    //get postid from query
+    const { postId } = req.query;
+
+    // Ensure that the IDs are converted to ObjectId type
+    const userIdObject = new mongoose.Types.ObjectId(userId);
+    const postIdObject = new mongoose.Types.ObjectId(postId);
+    const friendIdObject =new mongoose.Types.ObjectId(friendId);
+
+    //find the user who will like the post and get his username
+     const user = await User.findById(userId);
+     let likedUserName = user?.displayName
+
+    //To know that is he already liked the post or not
+    const isAlreadyLiked = await Post.findOne(
+        {userId:friendIdObject,"posts._id":postIdObject,"posts.likes.userId":userIdObject},
+        {"posts.$":1}
+    )
+
+    //if he already liked the post--throw an error
+    if (isAlreadyLiked) {
+        return next(new AppError("You have already liked the post",200))
+    }
+
+    //now update the result---with the details of who liked the post
+    const updatedResult = await Post.updateOne(
+        { userId: friendIdObject, "posts._id": postIdObject },
+        {
+          $push: {
+            "posts.$.likes": {
+              userId: userIdObject,
+              userName: likedUserName,
+              isLiked: true
+            }
+          }
+        }
+      );
+
+      //if result is not modified---throw an error
+      if (updatedResult.modifiedCount === 0) {
+        return next(new AppError("Post not found",404));
+      }
+      
+      //Fetch the updated post
+      const postResult = await Post.findOne(
+        { userId: friendIdObject, "posts._id": postIdObject },
+        { "posts.$": 1 }
+      );
+      
+      //if no updated post found---throw an error
+      if (!postResult) {
+        return next(new AppError("Post not found after update",404));
+      }
+      
+    res.status(200).json({
+        success:true,
+        message:"You have liked the post",
+        data:postResult.posts[0],
+    })
+    } catch (error:any) {
+        //error handling
+        console.error("Error deleting post a:", error.message);
+        return next(new AppError("Internal server error", 500));
+
+    }
+}
        
+//Remove the like
+const removeLike = async (req:CreatePostRequest,res:Response,next:NextFunction) => {
+    try {
+    //get userid from the jwtAuth middleware
+    const userId = req.user?.id;
+    //get friendid from the params
+    const { friendId } = req.params;
+    //get postid from query
+    const { postId } = req.query;
+
+    //Ensure that the IDs are converted to ObjectId type
+    const userIdObject = new mongoose.Types.ObjectId(userId);
+    const postIdObject = new mongoose.Types.ObjectId(postId);
+    const friendIdObject =new mongoose.Types.ObjectId(friendId);
+
+    //find that if the user has already liked the post or not
+    const isLiked = await Post.findOne(
+        {userId:friendIdObject,"posts._id":postIdObject,"posts.likes.userId":userIdObject},
+        {"posts.$":1}
+    )
+
+    //if he have not liked yet---throw an error
+    if (!isLiked) {
+        return next(new AppError("You have not liked the post",200))
+    }
+
+    //function to remove the like
+    const removeLike = await Post.updateOne(
+        {userId:friendIdObject,"posts._id":postIdObject},
+        {$pull:{"posts.$.likes": { userId: userIdObject }}}
+    )
+
+    //if the result is nodified---throw an error
+    if (removeLike.modifiedCount === 0) {
+        return next(new AppError("Post not founf or like not removed",404));
+      }
+
+    //Fetch the updated post
+    const postResult = await Post.findOne(
+        { userId: friendIdObject, "posts._id": postIdObject },
+        { "posts.$": 1 }
+      );
+      
+     //if no updated post found---throw an error 
+    if (!postResult) {
+        return res.status(404).json({
+          success: false,
+          message: "Post not found after update"
+        });
+      }
+
+      res.status(200).json({
+        success:true,
+        message:"Like removed",
+        data:postResult.posts[0]
+      })
+
+    } catch (error:any) {
+        //error handling
+        console.error("Error deleting post a:", error.message);
+        return next(new AppError("Internal server error", 500));
+    }
+}
+
+
+//add a comment to a post
+const createComment = async (req:CreatePostRequest,res:Response,next:NextFunction) => {
+    try {
+        //get the comment from the body
+        const {comment} = req.body;
+        //get userid from the jwtAuth middleware
+        const userId = req.user?.id;
+        //get friendid from the params
+        const { friendId } = req.params;
+        //get postid from query
+        const { postId } = req.query;
+
+        //Ensure that the IDs are converted to ObjectId type
+        const userIdObject = new mongoose.Types.ObjectId(userId);
+        const postIdObject = new mongoose.Types.ObjectId(postId);
+        const friendIdObject =new mongoose.Types.ObjectId(friendId);
+
+        //get the user who will comment and get his displayName
+        const user = await User.findById(userId);
+        let commentedUserName = user?.displayName
+
+        //now update the post with the comment from that user
+        const updatedResult = await Post.updateOne(
+            { userId: friendIdObject, "posts._id": postIdObject },
+            {
+            $push: {
+                "posts.$.comments": {
+                comment: comment,
+                userId: userIdObject,
+                userName: commentedUserName
+                }
+            }
+            }
+        );
+
+        //if the post is not modified---throw an error
+        if (updatedResult.modifiedCount === 0) {
+            return next(new AppError("Post not found",404));
+        }
+        
+        //Fetch the updated post
+        const postResult = await Post.findOne(
+            { userId: friendIdObject, "posts._id": postIdObject },
+            { "posts.$": 1 }
+        );
+        
+        //if no updated post found---throw an error
+        if (!postResult) {
+            return next(new AppError("Post not found after update",404))
+        }
+        
+        res.status(200).json({
+            success:true,
+            message:"You have commented on this post",
+            data:postResult.posts[0],
+        })
+
+
+    } catch (error:any) {
+        //error handling
+        console.error("Error deleting post a:", error.message);
+        return next(new AppError("Internal server error", 500));
+    }
+}
+
+//delete a comment
+const deleteComment = async (req:CreatePostRequest,res:Response,next:NextFunction) => {
+    try {
+       
+        //get userid from the jwtAuth middleware
+        const userId = req.user?.id;
+        //get friendid from the params
+        const { friendId } = req.params;
+        //get postid from query
+        const { postId } = req.query;
+
+        //Ensure that the IDs are converted to ObjectId type
+        const userIdObject = new mongoose.Types.ObjectId(userId);
+        const postIdObject = new mongoose.Types.ObjectId(postId);
+        const friendIdObject =new mongoose.Types.ObjectId(friendId);
+    
+        //find that has he commented on the post or not 
+        const isCommented = await Post.findOne(
+            {userId:friendIdObject,"posts._id":postIdObject,"posts.comments.userId":userIdObject},
+            {"posts.$":1}
+        )
+    
+        //if not,then throw an error
+        if (!isCommented) {
+            return next(new AppError("You have not commented on the post",200))
+        }
+    
+        //remove the comment
+        const removeComment = await Post.updateOne(
+            {userId:friendIdObject,"posts._id":postIdObject},
+            {$pull:{"posts.$.comments": { userId: userIdObject }}}
+        )
+    
+        //if after comment removal post is not modified---throw an error
+        if (removeComment.modifiedCount === 0) {
+            return next(new AppError("Post not found or comment not removed",404));
+          }
+    
+          //find the post 
+          const postResult = await Post.findOne(
+            { userId: friendIdObject, "posts._id": postIdObject },
+            { "posts.$": 1 }
+          );
+          
+          //if no post result is found
+          if (!postResult) {
+            return next(new AppError("Post not found after update",404));
+          }
+    
+          res.status(200).json({
+            success:true,
+            message:"Comment removed",
+            data:postResult.posts[0]
+          })
+    
+        } catch (error:any) {
+            //error handling
+            console.error("Error deleting post a:", error.message);
+            return next(new AppError("Internal server error", 500));
+        }
+}
 
 export  {
     createPost,
     getPost,
     getOnePost,
     updateOnePost,
-    deleteOnePost
+    deleteOnePost,
+    likePost,
+    removeLike,
+    createComment,
+    deleteComment
 };

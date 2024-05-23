@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createPost, deleteOnePost, getOnePost, getPost, updateOnePost } from "../controller/post.controller";
+import { createComment, createPost, deleteComment, deleteOnePost, getOnePost, getPost, likePost, removeLike, updateOnePost } from "../controller/post.controller";
 import upload from "../MiddleWare/multer.middleware";
 import { jwtAuth } from "../MiddleWare/jwtAuth";
 
@@ -24,5 +24,15 @@ postRouter
 postRouter
   .route("/delete")
   .delete(jwtAuth,deleteOnePost)
+
+postRouter
+  .route("/like/:friendId")
+  .post(jwtAuth,likePost)
+  .delete(jwtAuth,removeLike)
+
+postRouter
+  .route("/comment/:friendId")
+  .post(jwtAuth,createComment)
+  .delete(jwtAuth,deleteComment)
 
 export default postRouter;

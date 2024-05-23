@@ -12,6 +12,7 @@ interface IUser extends Document {
     generateResetPasswordToken(): Promise<string>;
     googleId?: string;
     displayName: string;
+    userId:string;
     email: string;
     photoURL?: {
         public_id: string;
