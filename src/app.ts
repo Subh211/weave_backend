@@ -8,6 +8,7 @@ import userRouter from './Router/user.router';
 import session from 'express-session';
 import cookieParser from "cookie-parser";
 import postRouter from './Router/post.router';
+import friendRouter from './Router/friend.router';
 
 
 //dotenv configuration
@@ -33,6 +34,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //userRoute
 app.use('/api/v1/user',userRouter)
 app.use('/api/v1/post',postRouter)
+app.use('/api/v1/friend',friendRouter)
 
 
 // Default route

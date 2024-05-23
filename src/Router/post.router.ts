@@ -1,30 +1,28 @@
 import { Router } from "express";
 import { createPost, deleteOnePost, getOnePost, getPost, updateOnePost } from "../controller/post.controller";
 import upload from "../MiddleWare/multer.middleware";
+import { jwtAuth } from "../MiddleWare/jwtAuth";
+
 
 
 const postRouter = Router();
 
+
 postRouter
   .route("/")
-  .post()
-  .get();
+  .get(jwtAuth,getPost)
+  .post(jwtAuth,upload.single('image'),createPost);
 
 postRouter
-  .route("/:userId")
-  .get(getPost)
-  .post(upload.single('image'),createPost);
+  .route("/getone")
+  .get(jwtAuth,getOnePost)
 
 postRouter
-  .route("/postDetails/:userId")
-  .get(getOnePost)
+  .route("/update")
+  .post(jwtAuth,updateOnePost)
 
 postRouter
-  .route("/updatePost/:userId")
-  .post(updateOnePost)
-
-postRouter
-  .route("/deletepost/:userId")
-  .post(deleteOnePost)
+  .route("/delete")
+  .delete(jwtAuth,deleteOnePost)
 
 export default postRouter;

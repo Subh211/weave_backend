@@ -23,8 +23,8 @@ interface CreatePostRequest extends Request {
 const createPost = async (req: CreatePostRequest, res: Response, next: NextFunction) => {
 
     try {
-        //Getting userId from the params
-        const {userId} = req.params
+        //Getting userId from the jwtAuth middleware
+        const userId = req.user?.id
         //Getting caption from the body
         const { caption } = req.body;
 
@@ -96,8 +96,8 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
 //get every post of that user
 const getPost = async (req: CreatePostRequest, res: Response, next: NextFunction) => {
     try {
-        //Get userId from the params
-        const {userId} = req.params
+        //Get userId from the jwtAuth middleware
+        const userId = req.user?.id
 
         //Find post with userId
         const post = await Post.findOne({ userId});
@@ -128,8 +128,8 @@ const getPost = async (req: CreatePostRequest, res: Response, next: NextFunction
 //get one particular post of that user
 const getOnePost = async (req: CreatePostRequest, res: Response, next: NextFunction) => {
     try {
-        //Get userId from params
-        const {userId} = req.params
+        //Get userId from jwtAuth middleware
+        const userId = req.user?.id
         //get postId from the query
         const {postId} = req.query
 
@@ -164,7 +164,7 @@ const updateOnePost = async (req: Request, res: Response, next: NextFunction) =>
       //Get caption from the body  
       const { caption } = req.body;
       //get userId from the params
-      const { userId } = req.params;
+      const  userId  = req.user?.id;
       //Get postId from the query
       const { postId } = req.query;
   
@@ -198,7 +198,7 @@ const updateOnePost = async (req: Request, res: Response, next: NextFunction) =>
 const deleteOnePost = async (req: CreatePostRequest, res: Response, next: NextFunction) => {
         try {
             //Get userId from the params
-            const {userId} = req.params
+            const userId = req.user?.id
             //Get postId from the query
             const {postId} = req.query
 
