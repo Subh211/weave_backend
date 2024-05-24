@@ -5,7 +5,7 @@ import AppError from "../Utils/appError";
 import fs from 'fs/promises';
 import { v2 as cloudinaryV2 } from 'cloudinary';
 import mongoose from 'mongoose';
-import { Console } from "console";
+import Notification from "../Models/notification.schema";
 
 
 
@@ -79,9 +79,25 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
             })
         }
 
-
         // Save the post to the database
         await post.save();
+
+        //postCreation notification for myself
+        let myPostCreationNotification = await Notification.findOne({userId});
+
+        //postCreation notification for myself
+        if (!myPostCreationNotification) {
+            myPostCreationNotification = await new Notification ({userId,notifications:[]});
+        }
+
+        //postCreation notification for myself
+        myPostCreationNotification.notifications.push({
+            notifiction:`Your post is created`,
+            date:(new Date()).toString()
+        })
+
+        //postCreation notification for myself
+        await myPostCreationNotification.save();
 
 
         return res.status(200).json({
@@ -186,6 +202,23 @@ const updateOnePost = async (req: Request, res: Response, next: NextFunction) =>
       if (result.matchedCount === 0) {
         return next(new AppError("Post not found", 404));
       }
+
+      //postUpdate notification for myself
+      let myPostUpdationNotification = await Notification.findOne({userId});
+
+      //postUpdate notification for myself
+      if (!myPostUpdationNotification) {
+          myPostUpdationNotification = await new Notification ({userId,notifications:[]});
+      }
+
+      //postUpdate notification for myself
+      myPostUpdationNotification.notifications.push({
+          notifiction:`Your post is updated successfully`,
+          date:(new Date()).toString()
+      })
+
+      //postUpdate notification for myself
+      await myPostUpdationNotification.save();
   
       res.status(200).json({
         status: 'success',
@@ -231,6 +264,23 @@ const deleteOnePost = async (req: CreatePostRequest, res: Response, next: NextFu
             if (imagePublicId) {
                 await cloudinaryV2.uploader.destroy(imagePublicId);
             }
+
+            //postDeletion notification for myself
+            let myPostDeletionNotification = await Notification.findOne({userId});
+
+            //postDeletion notification for myself
+            if (!myPostDeletionNotification) {
+                myPostDeletionNotification = await new Notification ({userId,notifications:[]});
+            }
+
+            //postDeletion notification for myself
+            myPostDeletionNotification.notifications.push({
+                notifiction:`Your post is now updated`,
+                date:(new Date()).toString()
+            })
+
+            //postDeletion notification for myself
+            await myPostDeletionNotification.save();
 
             return res.status(200).json({
                 success: true,

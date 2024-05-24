@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import User from "../Models/user.schema";
 import AppError from "../Utils/appError";
 import Friend from "../Models/friend.schema";
+import Notification from "../Models/notification.schema";
+
 
 interface makeFriendRequest extends Request {
     params: {
@@ -17,6 +19,14 @@ try {
     const  userId  = req.user?.id;
     //get frriendId from the params
     const { friendId } = req.params;
+
+    //Get the displayName of the user
+    let myUserDetails = await User.findById(userId)
+    let myName = myUserDetails?.displayName
+
+    //Get the displayName of the friend
+    let friendUserDetails = await User.findById(friendId)
+    let friendName = friendUserDetails?.displayName
 
     //find the friend of the user
     let friend = await Friend.findOne({ userId });
@@ -70,6 +80,40 @@ try {
     //wait until friend gets saved
     await friend.save();
 
+    //Following notification for myself
+    let myNotification = await Notification.findOne({userId});
+
+    //Following notification for myself
+    if (!myNotification) {
+        myNotification = await new Notification ({userId,notifications:[]});
+    }
+
+    //Following notification for myself
+    myNotification.notifications.push({
+        notifiction:`You are following ${friendName}`,
+        date:(new Date()).toString()
+    })
+
+    //Following notification for myself
+    await myNotification.save();
+
+    //Following notification for friend
+    let friendNotification = await Notification.findOne({ userId: friendId });
+
+    //Following notification for friend
+    if (!friendNotification) {
+        friendNotification = await new Notification ({ userId: friendId, notifications: [] });
+    }
+
+    //Following notification for friend
+    friendNotification.notifications.push({
+        notifiction:`${myName} started following you`,
+        date:(new Date()).toString()
+    })
+
+    //Following notification for friend
+    await friendNotification.save();
+
     return res.status(200).json({
         success:true,
         message:`You are now friends ${friend}`
@@ -91,6 +135,15 @@ try {
     const  userId  = req.user?.id;
     //get friend id from params
     const { friendId } = req.params;
+    
+    //Get the displayName of the user
+    let myUserDetails = await User.findById(userId)
+    let myName = myUserDetails?.displayName
+
+    //Get the displayName of the friend
+    let friendUserDetails = await User.findById(friendId)
+    let friendName = friendUserDetails?.displayName
+
 
     // Ensure that the IDs are converted to ObjectId type
     const userIdObject = new mongoose.Types.ObjectId(userId);
@@ -102,7 +155,42 @@ try {
         { $pull: { friends: { friendId: friendIdObject } } }
       )
 
-      return res.status(200).json({
+    //unfollowing notification for myself
+    let myNotification = await Notification.findOne({userId});
+
+    //unfollowing notification for myself
+    if (!myNotification) {
+        myNotification = await new Notification ({userId,notifications:[]});
+    }
+
+    //unfollowing notification for myself
+    myNotification.notifications.push({
+        notifiction:`You unfollowed ${friendName}`,
+        date:(new Date()).toString()   
+    })
+
+    //unfollowing notification for myself
+    await myNotification.save();
+
+    //unfollowing notification for friend
+    let friendNotification = await Notification.findOne({ userId: friendId });
+
+    //unfollowing notification for friend
+    if (!friendNotification) {
+        friendNotification = await new Notification ({ userId: friendId, notifications: [] });
+    }
+
+    //unfollowing notification for friend
+    friendNotification.notifications.push({
+        notifiction:`${myName} unfollowed you`,
+        date:(new Date()).toString()
+    })
+
+    
+    //unfollowing notification for friend
+    await friendNotification.save()
+
+    return res.status(200).json({
         success:true,
         message:"You are no more friends"
       })
