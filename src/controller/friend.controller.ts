@@ -29,11 +29,11 @@ try {
     let friendName = friendUserDetails?.displayName
 
     //find the friend of the user
-    let friend = await Friend.findOne({ userId });
+    let myFriends = await Friend.findOne({ userId });
 
     //if user have no friends create one
-    if (!friend) {
-        friend = await new Friend ({userId,friends:[]})
+    if (!myFriends) {
+        myFriends = await new Friend ({userId,following:[],followers:[]})
     }
 
     // Ensure that the IDs are converted to ObjectId type
@@ -41,24 +41,24 @@ try {
     const friendIdObject =new mongoose.Types.ObjectId(friendId);
 
     // Find the document and project only the matching friend element
-    const result = await Friend.findOne(
-    { userId: userIdObject, "friends.friendId": friendIdObject },
+    const areAlreadyFriends = await Friend.findOne(
+    { userId: userIdObject, "following.friendId": friendIdObject },
     { "friends.$": 1 }
     );
  
     //if any result found (i.e. if they are already friends) ---restrict them
-    if (result) {
+    if (areAlreadyFriends) {
         return next(new AppError("You are already friends",200))
     }
 
     //find details of the friend from user collection
     let friendDetails = await User.findOne({_id : friendId});
 
-    //if any friend details is there
+    //if any friend details is there---push into user's following array
     if (friendDetails) {
         //if that friend have a profile picture do this
         if (friendDetails.photoURL) {
-        friend.friends.push({
+        myFriends.following.push({
             friendId:friendDetails._id,
             friendName:friendDetails.displayName,
             friendImage:{
@@ -69,7 +69,7 @@ try {
         })} 
         //if that friend do not have a profile picture do this
         else {
-            friend.friends.push({
+            myFriends.following.push({
                 friendId:friendDetails._id,
             friendName:friendDetails.displayName,
             date:Date.now(),
@@ -77,8 +77,45 @@ try {
         }
     }
 
-    //wait until friend gets saved
-    await friend.save();
+    //wait until myFriend details gets saved
+    await myFriends.save();
+
+    //find the 'friends' of the friend
+    let friendsFriends = await Friend.findOne({ friendId });
+
+    //if friend have no friends create one
+    if (!friendsFriends) {
+        friendsFriends = await new Friend ({userId:friendId,following:[],followers:[]})
+    }
+    
+    //find details of user from user collection
+    let myDetails = await User.findOne({_id : userId});
+
+    //if any details is there---push into friend's followers array
+    if (myDetails) {
+        //if user have a profile picture do this
+        if (myDetails.photoURL) {
+        friendsFriends.followers.push({
+            friendId:myDetails._id,
+            friendName:myDetails.displayName,
+            friendImage:{
+                public_id:myDetails.photoURL?.public_id,
+                secure_url:myDetails.photoURL?.secure_url
+            },
+            date:Date.now(),
+        })} 
+        //if userdo not have a profile picture do this
+        else {
+            friendsFriends.followers.push({
+                friendId:myDetails._id,
+            friendName:myDetails.displayName,
+            date:Date.now(),
+            })
+        }
+    }
+
+    //wait until friends friend details get saved
+    await friendsFriends.save()
 
     //Following notification for myself
     let myNotification = await Notification.findOne({userId});
@@ -116,7 +153,7 @@ try {
 
     return res.status(200).json({
         success:true,
-        message:`You are now friends ${friend}`
+        message:`You are now friends ${myFriends}`
     })    
 
 } catch (error : any) {
@@ -149,11 +186,17 @@ try {
     const userIdObject = new mongoose.Types.ObjectId(userId);
     const friendIdObject =new mongoose.Types.ObjectId(friendId);
 
-    //Serach through the Friend collection
+    //Serach through the myFriend collection and delete friend's details from my 'following' array
     await Friend.updateOne(
         { userId: userIdObject },
-        { $pull: { friends: { friendId: friendIdObject } } }
-      )
+        { $pull: { following: { friendId: friendIdObject } } }
+    )
+
+    //Serach through the friends 'friends' collection and delete users details from my 'followers' array
+    await Friend.updateOne(
+        { userId: userIdObject },
+        { $pull: { followers: { friendId: friendIdObject } } }
+    )
 
     //unfollowing notification for myself
     let myNotification = await Notification.findOne({userId});
