@@ -5,7 +5,10 @@ import AppError from "../Utils/appError";
 import fs from 'fs/promises';
 import { v2 as cloudinaryV2 } from 'cloudinary';
 import mongoose from 'mongoose';
+import { Console } from "console";
+import { json } from "body-parser";
 import Notification from "../Models/notification.schema";
+
 
 
 
@@ -79,6 +82,7 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
             })
         }
 
+
         // Save the post to the database
         await post.save();
 
@@ -98,7 +102,6 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
 
         //postCreation notification for myself
         await myPostCreationNotification.save();
-
 
         return res.status(200).json({
             success: true,
@@ -203,6 +206,7 @@ const updateOnePost = async (req: Request, res: Response, next: NextFunction) =>
         return next(new AppError("Post not found", 404));
       }
 
+      
       //postUpdate notification for myself
       let myPostUpdationNotification = await Notification.findOne({userId});
 
@@ -287,6 +291,8 @@ const deleteOnePost = async (req: CreatePostRequest, res: Response, next: NextFu
                 message: "Post and associated image deleted successfully"
             });
 
+            
+
             } catch (error:any) {
                 //Error handling
                 console.error("Error deleting post:", error.message);
@@ -355,6 +361,23 @@ const likePost = async (req: CreatePostRequest, res: Response, next: NextFunctio
       if (!postResult) {
         return next(new AppError("Post not found after update",404));
       }
+
+      //post like notification for post owner
+      let likeNotificationForFriend = await Notification.findById(friendId);
+
+      //post like notification for post owner
+      if (!likeNotificationForFriend) {
+          likeNotificationForFriend = await new Notification ({userId:friendId,notifications:[]});
+      }
+
+      //post like notification for post owner
+      likeNotificationForFriend.notifications.push({
+          notifiction:`${likedUserName} liked your post`,
+          date:(new Date()).toString()
+      })
+
+      //post like notification for post owner
+      await likeNotificationForFriend.save();
       
     res.status(200).json({
         success:true,
@@ -485,6 +508,23 @@ const createComment = async (req:CreatePostRequest,res:Response,next:NextFunctio
             return next(new AppError("Post not found after update",404))
         }
         
+        //post comment notification for post owner
+        let commentNotificationForFriend = await Notification.findById(friendId);
+
+        //post comment notification for post owner
+        if (!commentNotificationForFriend) {
+            commentNotificationForFriend = await new Notification ({userId:friendId,notifications:[]});
+        }
+
+        //post comment notification for post owner
+        commentNotificationForFriend.notifications.push({
+            notifiction:`${commentedUserName} liked your post`,
+            date:(new Date()).toString()
+        })
+
+        //post comment notification for post owner
+        await commentNotificationForFriend.save();
+
         res.status(200).json({
             success:true,
             message:"You have commented on this post",
