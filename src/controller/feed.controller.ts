@@ -7,6 +7,16 @@ import User from "../Models/user.schema";
 import AppError from "../Utils/appError";
 
 
+function shuffleArray<T>(array: T[]): T[] {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+
+
 const feed = async (req: Request, res: Response, next: NextFunction) => {
     try {
         //////// get all posts of my followings
@@ -100,6 +110,8 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
             }
         }
 
+        let shuffledFolloingsPost = shuffleArray(totalPosts);
+
         //////// get all posts of my followings
 
 
@@ -117,6 +129,8 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
                 const restUsersThanMyFollowings = allUser.filter(user => 
                     !newResult.some(result => result.equals(user))
                 );
+
+                let restUserPosts: PostDetail[] = [];
                         
                 //run a for loop for every element of the allUser array
                 for (let i = 0; i < restUsersThanMyFollowings.length; i++) {
@@ -163,40 +177,48 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
                                 };
 
                                 //now push each posts to the totalPost array
-                                totalPosts.push(eachPosts);
+                                restUserPosts.push(eachPosts);
                             
                         }
                     }
                 }
             }
 
+            let shuffledRestUserPosts = shuffleArray(restUserPosts)
+
 
             //////// get all posts for the rest of the users
 
 
+            const finalShuffledFeed = shuffledFolloingsPost.concat(shuffledRestUserPosts)
 
         //now sort the totalPost array by filling the unlikedPosts with those posts only which are not liked by user 
         let unlikedPosts: PostDetail[] = [];
 
-        //loop through totalpost array
-        for (let a = 0; a < totalPosts.length; a++) { // Changed `<=` to `<`
-            let likedByUser = totalPosts[a].likes;
+                // Loop through totalpost array
+                for (let a = 0; a < finalShuffledFeed.length; a++) {
+                    let post = finalShuffledFeed[a]; // Get the current post
+                    
+                    // Check if likes is defined
+                    if (post.likes) {
+                        let likedByUser = post.likes;
 
-            let isLiked = false;
-            if (likedByUser) {
-                for (let b = 0; b < likedByUser.length; b++) { // Changed `<=` to `<`
-                    if (likedByUser[b].userId === userId) {
-                        isLiked = true;
-                        break; // Exit the loop if the post is liked by the user
-                    }
-                }
-            }
+                        let isLiked = false;
+                        for (let b = 0; b < likedByUser.length; b++) {
+                            if (likedByUser[b].userId === userId) {
+                                isLiked = true;
+                                break; // Exit the loop if the post is liked by the user
+                            }
+                        }
 
-            // Add to unlikedPosts if the post is not liked by the user
-            if (!isLiked) {
-                unlikedPosts.push(totalPosts[a]);
-            }
-        }
+                        // Add to unlikedPosts if the post is not liked by the user
+                        if (!isLiked) {
+                            unlikedPosts.push(post);
+                        }
+                            } else {
+                                console.log("Likes not defined for post:", post); // Log if likes is not defined
+                            }
+                        }
 
 
             res.status(200).json({
@@ -211,7 +233,6 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
             next(new AppError("Internal server error", 500));
         }
     };
-
 
 
 export { feed }
