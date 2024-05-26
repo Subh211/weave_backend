@@ -363,7 +363,7 @@ const likePost = async (req: CreatePostRequest, res: Response, next: NextFunctio
       }
 
       //post like notification for post owner
-      let likeNotificationForFriend = await Notification.findById(friendId);
+      let likeNotificationForFriend = await Notification.findOne({userId:friendIdObject});
 
       //post like notification for post owner
       if (!likeNotificationForFriend) {

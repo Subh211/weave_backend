@@ -3,6 +3,7 @@ import { Schema, Document, model } from "mongoose";
 interface IPost extends Document {
     userId: Schema.Types.ObjectId;
     posts: Array<{
+        _id?: any;
         image?: {
             public_id: string;
             secure_url: string;
