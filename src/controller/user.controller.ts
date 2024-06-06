@@ -8,12 +8,14 @@ import Post from "../Models/post.schema";
 import { v2 as cloudinaryV2 } from 'cloudinary';
 import fs from 'fs/promises';
 import crypto from 'crypto';
+import path from 'path';
 
 
 
 // Extend the Session interface to include a custom email property
 declare module 'express-session' {
     interface Session {
+        name?:string;
         email?: string;
         displayName?:string;
         photoURL?: {
@@ -49,6 +51,7 @@ const registerUserByEmail = async (req: Request & { session: session.Session }, 
     try {
         //Get email from body
         const { email } = req.body;
+        const { name } = req.body;
 
         // If fields are empty
         if (!email) {
@@ -67,11 +70,12 @@ const registerUserByEmail = async (req: Request & { session: session.Session }, 
             return next(new AppError("Email already exists", 400)) as unknown as Response;
         }
 
-        // Store email in session
+        // Store email & name in session
         req.session.email = email;
+        req.session.name = name;
 
         // Create user with email
-        user = await User.create({ email });
+        user = await User.create({ email , name});
 
         // Generate token for email registration
         const emailToken = await user.generateEmailRegisterToken();
@@ -176,6 +180,10 @@ const passwordByUser = async (req: Request & { session: session.Session }, res: 
         // Set the password of the user
         findUserByEmail.password=password;
 
+        //set emailRegistrationToken & emailRegistrationExpiry as undefined
+        findUserByEmail.emailRegistrationToken = undefined;
+        findUserByEmail.emailRegistrationExpiry=undefined;
+
         // Save user
         await findUserByEmail.save();
 
@@ -253,6 +261,24 @@ const userNameAndUserPicture = async (req: MulterFilesRequest & { session: sessi
 
             //Wait until the local file gets deleted
             await fs.unlink(file.path);
+        }
+
+        // If no file is provided, use the default local image
+        if (!req.file) {
+            const defaultImagePath = path.join(__dirname, '..', 'uploads', 'user.png');
+            const result = await cloudinaryV2.uploader.upload(defaultImagePath, {
+                folder: 'lms',
+                width: 250,
+                height: 250,
+                gravity: 'faces',
+                crop: 'fill'
+            });
+
+            // Assigning values of the default profile picture
+            photoURL = {
+                public_id: result.public_id,
+                secure_url: result.secure_url
+            };
         }
 
         //Finding the user with email and adding value of profile picture & user name

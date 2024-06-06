@@ -4,9 +4,7 @@ import User from "../Models/user.schema";
 import AppError from "../Utils/appError";
 import fs from 'fs/promises';
 import { v2 as cloudinaryV2 } from 'cloudinary';
-import mongoose from 'mongoose';
-import { Console } from "console";
-import { json } from "body-parser";
+import mongoose, { Types } from 'mongoose';
 import Notification from "../Models/notification.schema";
 
 
@@ -42,6 +40,10 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
 
         // Check if the user exists
         const user = await User.findById(userId);
+        const userIdObject = new Types.ObjectId(userId);
+        const userPublicId = user?.photoURL?.public_id;
+        const userSecureUrl = user?.photoURL?.secure_url;
+        const userDisplayName = user?.displayName;
 
         //If user dont exists throw an error
         if (!user) {
@@ -69,6 +71,12 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
 
                 //Push the caption and image to the post collection
                 post.posts.push({
+                    postOwnerId:userIdObject,
+                    postOwnerDisplayName:userDisplayName,
+                    postOwnerProfilePicture:{
+                        public_id: userPublicId,
+                        secure_url: userSecureUrl,
+                    },
                     caption,
                     image: {
                         public_id: file.public_id,
@@ -78,7 +86,14 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
         } else {
             //If only caption present in request,push that to the collection
             post.posts.push ({
-                caption
+                postOwnerId:userIdObject,
+                postOwnerDisplayName:userDisplayName,
+                postOwnerProfilePicture:{
+                    public_id: userPublicId,
+                    secure_url: userSecureUrl,
+                },
+                caption,
+
             })
         }
 

@@ -11,6 +11,7 @@ interface IUser extends Document {
     generateEmailRegisterToken(): Promise<string>;
     generateResetPasswordToken(): Promise<string>;
     googleId?: string;
+    name:string;
     displayName: string;
     userId:string;
     email: string;
@@ -36,6 +37,7 @@ const userSchema: Schema<IUser> = new Schema(
     {
         googleId: String,
         displayName: String,
+        name:String,
         email: { type: String, required: true },
         photoURL: {
             public_id: {

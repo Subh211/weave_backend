@@ -104,7 +104,7 @@ try {
             },
             date:Date.now(),
         })} 
-        //if userdo not have a profile picture do this
+        //if user do not have a profile picture do this
         else {
             friendsFriends.followers.push({
                 friendId:myDetails._id,

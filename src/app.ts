@@ -11,7 +11,6 @@ import postRouter from './Router/post.router';
 import friendRouter from './Router/friend.router';
 import feedRouter from './Router/feed.router';
 
-
 //dotenv configuration
 dotenv.config();
 
@@ -37,6 +36,7 @@ app.use('/api/v1/user',userRouter)
 app.use('/api/v1/post',postRouter)
 app.use('/api/v1/friend',friendRouter)
 app.use('/api/v1/feed',feedRouter)
+
 
 
 // Default route

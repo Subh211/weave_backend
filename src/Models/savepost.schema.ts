@@ -1,8 +1,8 @@
 import { Schema, Document, model, Types } from "mongoose";
 
-interface IPost extends Document {
+interface SavePost extends Document {
     userId: Schema.Types.ObjectId;
-    posts: Array<{
+    savedPosts: Array<{
         _id?: any;
         postOwnerDisplayName:any;
         postOwnerId:Types.ObjectId;
@@ -11,8 +11,8 @@ interface IPost extends Document {
             secure_url:any;
         };
         image?: {
-            public_id: string;
-            secure_url: string;
+            public_id: any;
+            secure_url: any;
         };
         caption?: string;
         comments?: Array<{
@@ -28,14 +28,14 @@ interface IPost extends Document {
     }>;
 }
 
-const postSchema: Schema<IPost> = new Schema(
+const savedPostSchema: Schema<SavePost> = new Schema(
     {
         userId: {
             type: Schema.Types.ObjectId,
             ref: "User",
             required: [true, "UserId is required"],
         },
-        posts: [
+        savedPosts: [
             {   
                 postOwnerDisplayName:String,
                 postOwnerId:{
@@ -89,7 +89,7 @@ const postSchema: Schema<IPost> = new Schema(
     { timestamps: true }
 );
 
-const Post = model<IPost>("Post", postSchema);
+const SavedPost = model<SavePost>("SavedPost", savedPostSchema);
 
-export default Post;
-export { IPost };
+export default SavedPost;
+export { SavePost };
