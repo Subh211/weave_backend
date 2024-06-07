@@ -29,23 +29,6 @@ userRouter.post('/register', upload.single('photoURL'), async (req: Request, res
 });
 
 
-// // Route for setting password
-// userRouter.post('/password/:emailToken', (req: Request & { session: session.Session }, res: Response, next: NextFunction) => {
-//     // Access the email property from the session
-//     const email = req.session.email;
-//     if (!email) {
-//         return next(new Error("Email not found in session"));
-//     }
-//     return passwordByUser(req as IRegistrationRequest, res, next);
-// });
-
-
-// //Route for Username and Profile picture
-// userRouter.post('/username', upload.single('photoURL') , (req: Request & { session: session.Session }, res: Response, next: NextFunction) => {
-//     userNameAndUserPicture(req as MulterFilesRequest & { session: session.Session }, res, next);
-// });
-
-
 //Route for SignIn
 userRouter.post('/signin', (req: Request, res: Response, next: NextFunction) => {
     signin(req , res, next);
