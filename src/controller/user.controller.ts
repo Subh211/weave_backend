@@ -11,222 +11,6 @@ import crypto from 'crypto';
 import path from 'path';
 
 
-
-// // Extend the Session interface to include a custom email property
-// declare module 'express-session' {
-//     interface Session {
-//         name?:string;
-//         email?: string;
-//         displayName?:string;
-//         photoURL?: {
-//             public_id: string;
-//             secure_url: string;
-//         }
-//     }
-// }
-
-// Extend the Request interface to include files for array-based uploads
-// export interface MulterFilesRequest extends Request {
-//     file?: Express.Multer.File;
-//     bio?: String;
-//         name:String;
-//         displayName: string;
-//         email: string;
-//         password: string;
-//         confirmPassword: string;
-//         photoURL: {
-//             public_id?: string;
-//             secure_url?: string;
-//         };
-// }
-
-// //Interface for IRegistrationRequest
-// export interface IRegistrationRequest extends Request {
-//     body: {
-//         bio?: String;
-//         name:String;
-//         displayName: string;
-//         email: string;
-//         password: string;
-//         confirmPassword: string;
-//         photoURL: {
-//             public_id?: string;
-//             secure_url?: string;
-//         };
-//     };
-// }
-
-
-// // Register by email function
-// const registerUserByEmail = async (req: MulterFilesRequest , res: Response, next: NextFunction): Promise<Response | void> => {
-   
-//     try {
-//         //Get email from body
-//         const { email } = req.body;
-//         const { name } = req.body;
-//         const { password } = req.body;
-//         const { confirmPassword } = req.body;
-//         const { displayName } = req.body;
-//         const { bio } = req.body;
-
-//         // If fields are empty
-//         if (!email) {
-//             return next(new AppError("Please enter your email address", 400)) as unknown as Response;
-//         }
-
-//         // Validate the email
-//         const validEmail = emailValidator.validate(email);
-//         if (!validEmail) {
-//             return next(new AppError("Please enter a valid email address", 400)) as unknown as Response;
-//         }
-
-//         // Check if the email already exists
-//         let user: IUser | null = await User.findOne({ email });
-//         if (user) {
-//             return next(new AppError("Email already exists", 400)) as unknown as Response;
-//         }
-
-//         // If fields are empty
-//         if (!password || !confirmPassword) {
-//             return next(new AppError("Please enter password and confirm password", 400)) as unknown as Response;
-//         }
-
-//         //Regex for password
-//         const passwordRegex: RegExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,16})/;
-
-//         //Validate the regex with user given input
-//         if (!passwordRegex.test(password)) {
-//             return next(new AppError("Password should be between 8-16 characters long and should contain atleast one uppercase letter,one lowercase letter and one symbol ", 400)) as unknown as Response;
-
-//         }
-
-//         if (password !== confirmPassword) {
-//             return next(new AppError("Passwords do not match", 400)) as unknown as Response;
-//         }
-
-//         //Get photoURL
-//         let photoURL = req.body.photoURL;
-
-//         //If no user name is given
-//         if (!displayName) {
-//             return next(new AppError("Username is required", 400)) as unknown as Response;
-//         }
-
-//         //Regex for user name
-//         const usernameRegex: RegExp = /^[a-z_-]+$/;
-
-//         //Validate the regex with user given input
-//         if (!usernameRegex.test(displayName)) {
-//             return next(new AppError("Username should be in small letter & contains only _ and -", 400)) as unknown as Response;
-//         }
-
-//         //Checking the User name if it is unique or not
-//         let userName = await User.findOne({ displayName });
-//         if (userName) {
-//             return next(new AppError("Username already exists, please try a different username", 400)) as unknown as Response;
-//         }
-
-//         //Uploading the profile picture to cloudinary
-//         if (req.file) {
-//             const file = req.file;
-//             const result = await cloudinaryV2.uploader.upload(file.path, {
-//                 folder: 'lms',
-//                 width: 250,
-//                 height: 250,
-//                 gravity: 'faces',
-//                 crop: 'fill'
-//             });
-
-//             //Assinging values of the new profile picture
-//             photoURL = {
-//                 public_id: result.public_id,
-//                 secure_url: result.secure_url
-//             };
-
-//             //Wait until the local file gets deleted
-//             await fs.unlink(file.path);
-//         }
-
-//         // If no file is provided, use the default local image
-//         if (!req.file) {
-//             const defaultImagePath = path.join(__dirname, '..', 'uploads', 'user.png');
-//             const result = await cloudinaryV2.uploader.upload(defaultImagePath, {
-//                 folder: 'lms',
-//                 width: 250,
-//                 height: 250,
-//                 gravity: 'faces',
-//                 crop: 'fill'
-//             });
-
-//             // Assigning values of the default profile picture
-//             photoURL = {
-//                 public_id: result.public_id,
-//                 secure_url: result.secure_url
-//             };
-//         }
-
-//         // // Store email & name in session
-//         // req.session.email = email;
-//         // req.session.name = name;
-
-//         // Create user with email
-//         user = await User.create({ email , name , password , bio , displayName , photoURL });
-
-//         //Generate a token 
-//         const token = jwtToken(user);
-
-//         //Setting the user's password value as "" as it dont come in response
-//         user.password = "";
-
-//         //Declaring the cookie options
-//         const cookieOptions = {
-//             maxAge:24*60*3600*1000,
-//             httpOnly:true
-//         }
-
-//         //Generate the cookie in response
-//         res.cookie("token",token,cookieOptions);
-
-//         // // Generate token for email registration
-//         // const emailToken = await user.generateEmailRegisterToken();
-
-//         // // URL for email registration
-//         // const registrationWithEmailURL = `http://localhost:${process.env.PORT}/api/v1/user/password/${emailToken}`;
-
-//         // // Define subject and message for the Mail
-//         // const subject = "Register with Email";
-//         // const message = `You can register with your Email address by clicking here: <a href="${registrationWithEmailURL}" target="_self">Register your Email</a>`;
-
-//         // // Send the email
-//         // try {
-//         //     await sendEmail(subject, message, email);
-
-//         //     return res.status(200).json({
-//         //         success: true,
-//         //         message: `Successfully sent the mail to ${email}`,
-//         //         data: registrationWithEmailURL,
-//         //     });
-
-//         // } catch (error) {
-//         //     // Error handling if email sending fails
-//         //     if (error instanceof Error) {
-//         //         next(new AppError(`Unable to send the mail: ${error.message}`, 500));
-//         //     } else {
-//         //         next(new AppError("Unable to send the mail", 500));
-//         //     }
-//         // }
-
-//     } catch (error) {
-//         // Internal server error handling
-//         if (error instanceof Error) {
-//             next(new AppError(`Internal server error: ${error.message}`, 500));
-//         } else {
-//             next(new AppError("Internal server error", 500));
-//         }
-//     }
-// };
-
-
 // Extend the Request interface to include files for array-based uploads
 export interface MulterFilesRequest extends Request {
     file?: Express.Multer.File;
@@ -242,54 +26,66 @@ export interface MulterFilesRequest extends Request {
     };
 }
 
-// Register by email function
+// SignUp function
 const registerUserByEmail = async (req: MulterFilesRequest, res: Response, next: NextFunction): Promise<Response | void> => {
     try {
+        //get these details from the body
         const { email, name, password, confirmPassword, displayName, bio } = req.body;
 
+        //if email not found throw an error
         if (!email) {
             return next(new AppError("Please enter your email address", 400));
         }
 
+        //check the email is valid or not
         const validEmail = emailValidator.validate(email);
         if (!validEmail) {
             return next(new AppError("Please enter a valid email address", 400));
         }
 
+        //find if user already exists or not
         let user = await User.findOne({ email });
         if (user) {
             return next(new AppError("Email already exists", 400));
         }
 
+        //if password & confirmPassword is not entered
         if (!password || !confirmPassword) {
             return next(new AppError("Please enter password and confirm password", 400));
         }
 
+        //Validate the password
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,16})/;
         if (!passwordRegex.test(password)) {
             return next(new AppError("Password should be between 8-16 characters long and should contain at least one uppercase letter, one lowercase letter, and one symbol", 400));
         }
 
+        //if password & confirmPassword dont match
         if (password !== confirmPassword) {
             return next(new AppError("Passwords do not match", 400));
         }
 
+        //get the picture from body
         let photoURL = req.body.photoURL;
 
+        //if user did not give username
         if (!displayName) {
             return next(new AppError("Username is required", 400));
         }
 
+        //validate the username
         const usernameRegex = /^[a-z_-]+$/;
         if (!usernameRegex.test(displayName)) {
             return next(new AppError("Username should be in small letter & contains only _ and -", 400));
         }
 
+        //check if username already exists
         let userName = await User.findOne({ displayName });
         if (userName) {
             return next(new AppError("Username already exists, please try a different username", 400));
         }
 
+        //upload the image file
         if (req.file) {
             const file = req.file;
             const result = await cloudinaryV2.uploader.upload(file.path, {
@@ -324,10 +120,13 @@ const registerUserByEmail = async (req: MulterFilesRequest, res: Response, next:
             };
         }
 
+        //create the user
         user = await User.create({ email, name, password, bio, displayName, photoURL });
 
+        //save the user
         await user.save();
-        
+
+        //generate a token
         const token = jwtToken(user);
         user.password = "";
 
@@ -352,220 +151,6 @@ const registerUserByEmail = async (req: MulterFilesRequest, res: Response, next:
         }
     }
 };
-
-
-
-
-
-// // Function for password input from user
-// const passwordByUser = async (req: Request & { session: session.Session }, res: Response, next: NextFunction): Promise<Response | void> => {
-   
-//     try {
-//         //Get the emailToken from params
-//         const { emailToken } = req.params;
-
-//         //Hash the emailToken to validate it with dataBase 
-//         const emailTokenValidator = await crypto
-//         .createHash('sha256')
-//         .update(emailToken)
-//         .digest('hex')
-
-//         //Find the user based on the generated token
-//         const user: IUser | null = await User.findOne({
-//             emailRegistrationToken: emailTokenValidator,
-//             emailRegistrationExpiry: { $gt: Date.now() }
-//         });
-        
-//         //If user does not exists
-//         if ( !user ) {
-//             return next(new AppError("User not found", 400)) as unknown as Response;
-//         }
-
-//         //Get password and confirm password from body
-//         const { password, confirmPassword } = req.body;
-
-//         // If fields are empty
-//         if (!password || !confirmPassword) {
-//             return next(new AppError("Please enter password and confirm password", 400)) as unknown as Response;
-//         }
-
-//         //Regex for password
-//         const passwordRegex: RegExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,16})/;
-
-//         //Validate the regex with user given input
-//         if (!passwordRegex.test(password)) {
-//             return next(new AppError("Password should be between 8-16 characters long and should contain atleast one uppercase letter,one lowercase letter and one symbol ", 400)) as unknown as Response;
-
-//         }
-
-//         // Get email from session
-//         const email = req.session.email;
-//         if (!email) {
-//             return next(new AppError("Email not found in session", 404)) as unknown as Response;
-//         }
-
-//         // Find user by email
-//         let findUserByEmail: IUser | null = await User.findOne({ email });
-
-//         // If user not found
-//         if (!findUserByEmail) {
-//             return next(new AppError("User not found", 404)) as unknown as Response;
-//         }
-
-//         // Validate passwords
-//         if (password !== confirmPassword) {
-//             return next(new AppError("Passwords do not match", 400)) as unknown as Response;
-//         }
-
-//         // Set the password of the user
-//         findUserByEmail.password=password;
-
-//         //set emailRegistrationToken & emailRegistrationExpiry as undefined
-//         findUserByEmail.emailRegistrationToken = undefined;
-//         findUserByEmail.emailRegistrationExpiry=undefined;
-
-//         // Save user
-//         await findUserByEmail.save();
-
-//         // Return success response
-//         return res.status(200).json({
-//             success: true,
-//             message: "Password set successfully",
-//             data: user
-//         });
-
-//     } catch (error) {
-//         // Error handling
-//         if (error instanceof Error) {
-//             next(new AppError(`Internal server error: ${error.message}`, 500));
-//         } else {
-//             next(new AppError("Internal server error", 500));
-//         }
-// };
-// }
-
-
-// //Function to add profile picture & unique username
-// const userNameAndUserPicture = async (req: MulterFilesRequest & { session: session.Session }, res: Response, next: NextFunction): Promise<Response | void> => {
-  
-//     try {
-//         //Get the displayName from body
-//         const { displayName } = req.body;
-//         const { bio } = req.body;
-
-
-//         //Get photoURL
-//         let photoURL = req.body.photoURL;
-
-//         //If no user name is given
-//         if (!displayName) {
-//             return next(new AppError("Username is required", 400)) as unknown as Response;
-//         }
-
-//         //Regex for user name
-//         const usernameRegex: RegExp = /^[a-z_-]+$/;
-
-//         //Validate the regex with user given input
-//         if (!usernameRegex.test(displayName)) {
-//             return next(new AppError("Username should be in small letter & contains only _ and -", 400)) as unknown as Response;
-//         }
-
-//         // //Getting mail from the session
-//         // const email = req.session.email;
-
-//         // //Error if email not found in session
-//         // if (!email) {
-//         //     return next(new AppError("Email not found in session", 400)) as unknown as Response;
-//         // }
-
-//         //Checking the User name if it is unique or not
-//         let userName = await User.findOne({ displayName });
-//         if (userName) {
-//             return next(new AppError("Username already exists, please try a different username", 400)) as unknown as Response;
-//         }
-
-//         //Uploading the profile picture to cloudinary
-//         if (req.file) {
-//             const file = req.file;
-//             const result = await cloudinaryV2.uploader.upload(file.path, {
-//                 folder: 'lms',
-//                 width: 250,
-//                 height: 250,
-//                 gravity: 'faces',
-//                 crop: 'fill'
-//             });
-
-//             //Assinging values of the new profile picture
-//             photoURL = {
-//                 public_id: result.public_id,
-//                 secure_url: result.secure_url
-//             };
-
-//             //Wait until the local file gets deleted
-//             await fs.unlink(file.path);
-//         }
-
-//         // If no file is provided, use the default local image
-//         if (!req.file) {
-//             const defaultImagePath = path.join(__dirname, '..', 'uploads', 'user.png');
-//             const result = await cloudinaryV2.uploader.upload(defaultImagePath, {
-//                 folder: 'lms',
-//                 width: 250,
-//                 height: 250,
-//                 gravity: 'faces',
-//                 crop: 'fill'
-//             });
-
-//             // Assigning values of the default profile picture
-//             photoURL = {
-//                 public_id: result.public_id,
-//                 secure_url: result.secure_url
-//             };
-//         }
-
-//         //Finding the user with email and adding value of profile picture & user name
-//         const user = await User.findOneAndUpdate({ email }, {
-//             displayName,
-//             photoURL
-//         }, { new: true });
-
-//         //If user not created---Give an error
-//         if (!user) {
-//             return next(new AppError("User not created", 404)) as unknown as Response;
-//         }
-
-//         //Generate a token 
-//         const token = jwtToken(user);
-
-//         //Setting the user's password value as "" as it dont come in response
-//         user.password = "";
-
-//         //Declaring the cookie options
-//         const cookieOptions = {
-//             maxAge:24*60*3600*1000,
-//             httpOnly:true
-//         }
-
-//         //Generate the cookie in response
-//         res.cookie("token",token,cookieOptions);
-        
-
-//         return res.status(200).json({
-//             success: true,
-//             message: "Username and picture set successfully",
-//             data: user,
-//             photoURL:photoURL
-//         });
-
-//     } catch (error) {
-//         //Error handling for internal server error
-//         if (error instanceof Error) {
-//             next(new AppError(`Internal server error: ${error.message}`, 500));
-//         } else {
-//             next(new AppError("Internal server error", 500));
-//         }
-//     }
-// };
 
 
 //Signin function
