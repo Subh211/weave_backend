@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import { IRegistrationRequest , MulterFilesRequest , changePassword, deleteUser, forgetPassword, logOut, passwordByUser, registerUserByEmail, resetPassword, signin, updateUser, userDetails, userNameAndUserPicture }from "../controller/user.controller";
+import {  MulterFilesRequest , changePassword, deleteUser, forgetPassword, logOut, registerUserByEmail, resetPassword, signin, updateUser, userDetails }from "../controller/user.controller";
 import upload from "../MiddleWare/multer.middleware";
 import session from 'express-session';
 import { jwtAuth } from "../MiddleWare/jwtAuth";
@@ -17,28 +17,33 @@ const userRouter = Router();
 
 
 // Route for user registration
-userRouter.post('/register', (req: Request & { session: session.Session }, res: Response, next: NextFunction) => {
-    // Set the email property in the session
-    req.session.email = req.body.email;
-    return registerUserByEmail(req as IRegistrationRequest, res, next);
-});
-
-
-// Route for setting password
-userRouter.post('/password/:emailToken', (req: Request & { session: session.Session }, res: Response, next: NextFunction) => {
-    // Access the email property from the session
-    const email = req.session.email;
-    if (!email) {
-        return next(new Error("Email not found in session"));
+userRouter.post('/register', upload.single('photoURL'), async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Type assertion to MulterFilesRequest
+        const multerFilesRequest = req as MulterFilesRequest;
+        await registerUserByEmail(multerFilesRequest, res, next);
+    } catch (error) {
+        // Handle errors
+        next(error);
     }
-    return passwordByUser(req as IRegistrationRequest, res, next);
 });
 
 
-//Route for Username and Profile picture
-userRouter.post('/username', upload.single('photoURL') , (req: Request & { session: session.Session }, res: Response, next: NextFunction) => {
-    userNameAndUserPicture(req as MulterFilesRequest & { session: session.Session }, res, next);
-});
+// // Route for setting password
+// userRouter.post('/password/:emailToken', (req: Request & { session: session.Session }, res: Response, next: NextFunction) => {
+//     // Access the email property from the session
+//     const email = req.session.email;
+//     if (!email) {
+//         return next(new Error("Email not found in session"));
+//     }
+//     return passwordByUser(req as IRegistrationRequest, res, next);
+// });
+
+
+// //Route for Username and Profile picture
+// userRouter.post('/username', upload.single('photoURL') , (req: Request & { session: session.Session }, res: Response, next: NextFunction) => {
+//     userNameAndUserPicture(req as MulterFilesRequest & { session: session.Session }, res, next);
+// });
 
 
 //Route for SignIn
