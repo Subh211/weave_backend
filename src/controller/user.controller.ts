@@ -65,8 +65,6 @@ const registerUserByEmail = async (req: MulterFilesRequest, res: Response, next:
             return next(new AppError("Passwords do not match", 400));
         }
 
-        let imageFile;
-
         //get the picture from body
         let photoURL = req.body.photoURL;
 
@@ -90,24 +88,18 @@ const registerUserByEmail = async (req: MulterFilesRequest, res: Response, next:
         //upload the image file
         if (req.file) {
             const file = req.file;
-            if (photoURL) {
-                const imageBuffer = Buffer.from(photoURL, 'base64');
-
-            // Save the image buffer to a file or upload directly to Cloudinary
-            const result = await cloudinaryV2.uploader.upload_stream({
+            const result = await cloudinaryV2.uploader.upload(file.path, {
                 folder: 'lms',
                 width: 250,
                 height: 250,
                 gravity: 'faces',
                 crop: 'fill'
-            }, (error, result) => {
-                if (error) return next(new AppError("Image upload failed", 500));
-                imageFile = {
-                    public_id: result?.public_id,
-                    secure_url: result?.secure_url
-                };
             });
-            }
+
+            photoURL = {
+                public_id: result.public_id,
+                secure_url: result.secure_url
+            };
 
             await fs.unlink(file.path);
         }
@@ -129,7 +121,7 @@ const registerUserByEmail = async (req: MulterFilesRequest, res: Response, next:
         }
 
         //create the user
-        user = await User.create({ email, name, password, bio, displayName, photoURL:imageFile });
+        user = await User.create({ email, name, password, bio, displayName, photoURL });
 
         //save the user
         await user.save();
@@ -159,7 +151,6 @@ const registerUserByEmail = async (req: MulterFilesRequest, res: Response, next:
         }
     }
 };
-
 
 //Signin function
 const signin = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
