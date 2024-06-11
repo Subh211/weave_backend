@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import {  MulterFilesRequest , changePassword, deleteUser, forgetPassword, logOut, registerUserByEmail, resetPassword, signin, updateUser, userDetails }from "../controller/user.controller";
+import {  MulterFilesRequest , changePassword, deleteUser, logOut, registerUserByEmail, signin, updateUser, userDetails }from "../controller/user.controller";
 import upload from "../MiddleWare/multer.middleware";
 import session from 'express-session';
 import { jwtAuth } from "../MiddleWare/jwtAuth";
@@ -46,17 +46,6 @@ userRouter.get('/logout', jwtAuth , (req: Request, res: Response, next: NextFunc
     logOut(req , res, next);
 });
 
-
-//Route for forget password
-userRouter.post('/reset-password', (req: Request, res: Response, next: NextFunction) => {
-    forgetPassword(req , res, next);
-})
-
-
-//Route for reset password
-userRouter.post('/reset-password/:resetToken', (req: Request, res: Response, next: NextFunction) => {
-    resetPassword(req , res, next);
-})
 
 //Route for changing password
 userRouter.post('/change-password', jwtAuth , (req: Request, res: Response, next: NextFunction) => {

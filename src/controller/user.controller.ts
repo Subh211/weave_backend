@@ -9,6 +9,7 @@ import { v2 as cloudinaryV2 } from 'cloudinary';
 import fs from 'fs/promises';
 import crypto from 'crypto';
 import path from 'path';
+import mongoose from 'mongoose';
 
 
 // Extend the Request interface to include files for array-based uploads
@@ -140,7 +141,8 @@ const registerUserByEmail = async (req: MulterFilesRequest, res: Response, next:
         res.status(200).json({
             success: true,
             message: 'User registered successfully',
-            user
+            user:user,
+            token:user
         });
 
     } catch (error) {
@@ -196,6 +198,8 @@ const signin = async (req: Request, res: Response, next: NextFunction): Promise<
         res.cookie("token", token, cookieOptions);
 
         res.status(200).json({
+            message:"Sign in successfull",
+            token:user,
             success: true,
             data: user
         });
@@ -219,6 +223,12 @@ const userDetails = async ( req: Request , res : Response , next :NextFunction )
         //Find the user by unique user ID
         const user = await User.findById(userId);
 
+        //create userIdObject to find user's posts
+        const userIdObject = new mongoose.Types.ObjectId(userId);
+
+        //find posts of the user
+        const post = await Post.findOne({userId:userIdObject})
+
         //If user dont exists throw an error
         if (!user) {
             return next(new AppError("Both fields required", 400)) ;
@@ -226,7 +236,9 @@ const userDetails = async ( req: Request , res : Response , next :NextFunction )
 
         res.status(200).json({
             success:true,
-            message:user
+            message:"Got user successfully",
+            user:user,
+            post:post
         })
 
     } catch (error) {
@@ -269,140 +281,6 @@ const logOut = async ( req: Request , res : Response , next :NextFunction ) : Pr
             next(new AppError("Internal server error", 500));
         }
 
-    }
-
-}
-
-
-//Forget password function
-const forgetPassword = async ( req: Request , res : Response , next: NextFunction ) : Promise <Response | void> => {
-    try {
-        
-        //Get the user email from body
-        const { email } = req.body;
-
-        //If user dont put the mail
-        if ( !email ) {
-            return next(new AppError("Please enter your email", 400)) as unknown as Response;
-        }
-
-        //Find the user based on email in database
-        const user = await User.findOne({email});
-
-        //If user not found throw an error
-        if ( !user ) {
-            return next(new AppError("This email is not register", 400)) as unknown as Response;
-        }
-
-        //Generate token for forget password
-        const passwordToken = await user.generateResetPasswordToken();
-        console.log(passwordToken)
-
-        //Generate link for forget password
-        const resetPasswordURL = `http://localhost:${process.env.PORT}/api/v1/user/reset-password/${passwordToken}`;
-
-        // Define subject and message for the Mail
-        const subject = "Reset your password";
-        const message = `You can reset your password by clicking here: <a href="${resetPasswordURL}" target="_self">Reset Password</a>`;
-
-        try {
-            //Send the mail to the user
-            await sendEmail(subject, message, email);
-            console.log(resetPasswordURL); // Logging for testing purposes
-
-            return res.status(200).json({
-                success: true,
-                message: `Successfully sent the mail to ${email}`,
-                data: resetPasswordURL,
-            });
-
-        } catch (error) {
-            // Error handling if email sending fails
-            if (error instanceof Error) {
-                next(new AppError(`Unable to send the mail: ${error.message}`, 500));
-            } else {
-                next(new AppError("Unable to send the mail", 500));
-            }
-        }
-
-
-    } catch (error) {
-         // Internal server error handling
-         if (error instanceof Error) {
-            next(new AppError(`Internal server error: ${error.message}`, 500));
-        } else {
-            next(new AppError("Internal server error", 500));
-        }
-    }
-}
-
-
-//Reset password function
-const resetPassword = async ( req: Request , res : Response , next: NextFunction ) : Promise <Response | void> => {
-    
-    try {
-
-        //Get the user given new password from body
-        const { password } = req.body;
-
-        //Get the resetToken from params
-        const { resetToken } = req.params;
-
-        //If user did not given any password
-        if ( !password ) {
-            return next(new AppError("Please enter your new password", 400)) as unknown as Response;
-
-        }
-
-        //Regex for password
-        const passwordRegex: RegExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,16})/;
-
-        //Validate the regex with user given input
-        if (!passwordRegex.test(password)) {
-            return next(new AppError("Password should be between 8-16 characters long and should contain atleast one uppercase letter,one lowercase letter and one symbol ", 400)) as unknown as Response;
-
-        }
-
-        //Create a token for the new password
-        const resetPasswordToken = await crypto
-        .createHash('sha256')
-        .update(resetToken)
-        .digest('hex')
-
-        //Find the user based on the generated token
-        const user = await User.findOne ({
-            resetPasswordToken,
-            resetPasswordExpiry : { $gt:Date.now()}
-        })
-        
-        //If user does not exists
-        if ( !user ) {
-            return next(new AppError("User not found", 400)) as unknown as Response;
-        }
-
-        //Set the new password 
-        user.password = password;
-
-        //set resetPasswordToken & resetPasswordExpiry as undefined
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpiry = undefined;
-
-        //Save the user
-        await user.save();
-
-        res.status(200).json({
-            success:true,
-            message:"Password updated successfully",
-            data:user
-        })
-
-    } catch (error) {
-        // Internal server error handling
-        if (error instanceof Error) {
-            next(new AppError(`Internal server error: ${error.message}`, 500));
-        } else {
-            next(new AppError("Internal server error", 500));
-        }
     }
 
 }
@@ -663,8 +541,6 @@ export { registerUserByEmail,
         signin , 
         userDetails , 
         logOut , 
-        forgetPassword , 
-        resetPassword , 
         changePassword , 
         updateUser ,
         deleteUser};
