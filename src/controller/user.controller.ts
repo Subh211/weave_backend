@@ -216,7 +216,7 @@ const signin = async (req: Request, res: Response, next: NextFunction): Promise<
 const userDetails = async ( req: Request , res : Response , next :NextFunction ) : Promise <Response | void> => {
     
     //Get the user id from req.user (as user has logged in,so cookie generated,next time req will inclue cookie)
-    const userId = req.user?.id;
+    const userId = req.user?._id;
 
     try {
         
@@ -295,7 +295,7 @@ const changePassword = async ( req: Request , res : Response , next: NextFunctio
         const { oldPassword , newPassword } = req.body;
 
         //Get the new image as photoURL from body
-        const userId = req.user?.id
+        const userId = req.user?._id
 
         //If user dont gave either old password or new password
         if ( !oldPassword || !newPassword ) {
@@ -371,7 +371,7 @@ const updateUser = async ( req: Request , res : Response , next: NextFunction ) 
         let photoURL = req.body.photoURL;
 
         //Get the user id from jwtAuth middleware
-        const userId = req.user?.id;
+        const userId = req.user?._id;
 
         //If user dont give the username
         if ( !userName ) {
@@ -463,7 +463,7 @@ const deleteUser = async ( req: Request , res : Response , next: NextFunction ) 
 
     try {
         //Get userId from jwtAuth middleware
-        const userId = req.user?.id;
+        const userId = req.user?._id;
 
         //Find the user based on the userId
         let user = await User.findById (userId).select('+password');
