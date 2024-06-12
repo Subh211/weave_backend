@@ -20,7 +20,11 @@ interface CreatePostRequest extends Request {
     file?: Express.Multer.File;
     body: {
         caption: string;
-        comment: string
+        comment: string;
+        image: {
+            public_id?: string;
+            secure_url?: string;
+        };
     };
 }
 
@@ -32,6 +36,9 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
         const userId = req.user?.id
         //Getting caption from the body
         const { caption } = req.body;
+        //Get the new image as photoURL from body
+        let image = req.body.image;
+
 
         //If caption is not present--throw an erroe
         if (!caption) {
@@ -65,6 +72,11 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
                     gravity: "center",
                     crop: "fill",
                 });
+
+                image = {
+                    public_id: file.public_id,
+                    secure_url: file.secure_url
+                };
 
                 //Delete the local file after uploading
                 await fs.rm(`./uploads/${req.file.filename}`);
