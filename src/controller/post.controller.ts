@@ -29,7 +29,7 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
 
     try {
         //Getting userId from the jwtAuth middleware
-        const userId = req.user?.id
+        const userId = req.user?._id
         //Getting caption from the body
         const { caption } = req.body;
 
@@ -135,7 +135,7 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
 const getPost = async (req: CreatePostRequest, res: Response, next: NextFunction) => {
     try {
         //Get userId from the jwtAuth middleware
-        const userId = req.user?.id
+        const userId = req.user?._id
 
         //Find post with userId
         const post = await Post.findOne({ userId});
@@ -167,7 +167,7 @@ const getPost = async (req: CreatePostRequest, res: Response, next: NextFunction
 const getOnePost = async (req: CreatePostRequest, res: Response, next: NextFunction) => {
     try {
         //Get userId from jwtAuth middleware
-        const userId = req.user?.id
+        const userId = req.user?._id
         //get postId from the query
         const {postId} = req.query
 
@@ -202,7 +202,7 @@ const updateOnePost = async (req: Request, res: Response, next: NextFunction) =>
       //Get caption from the body  
       const { caption } = req.body;
       //get userId from the jwtAuth middleware
-      const  userId  = req.user?.id;
+      const  userId  = req.user?._id;
       //Get postId from the query
       const { postId } = req.query;
   
@@ -254,7 +254,7 @@ const updateOnePost = async (req: Request, res: Response, next: NextFunction) =>
 const deleteOnePost = async (req: CreatePostRequest, res: Response, next: NextFunction) => {
         try {
             //Get userId from the jwtAuth middleware
-            const userId = req.user?.id
+            const userId = req.user?._id
             //Get postId from the query
             const {postId} = req.query
 
@@ -321,7 +321,7 @@ const deleteOnePost = async (req: CreatePostRequest, res: Response, next: NextFu
 const likePost = async (req: CreatePostRequest, res: Response, next: NextFunction) => {
     try {
     //get userid from the jwtAuth middleware
-    const userId = req.user?.id;
+    const userId = req.user?._id;
     //get friendid from the params
     const { friendId } = req.params;
     //get postid from query
@@ -411,7 +411,7 @@ const likePost = async (req: CreatePostRequest, res: Response, next: NextFunctio
 const removeLike = async (req:CreatePostRequest,res:Response,next:NextFunction) => {
     try {
     //get userid from the jwtAuth middleware
-    const userId = req.user?.id;
+    const userId = req.user?._id;
     //get friendid from the params
     const { friendId } = req.params;
     //get postid from query
@@ -478,7 +478,7 @@ const createComment = async (req:CreatePostRequest,res:Response,next:NextFunctio
         //get the comment from the body
         const {comment} = req.body;
         //get userid from the jwtAuth middleware
-        const userId = req.user?.id;
+        const userId = req.user?._id;
         //get friendid from the params
         const { friendId } = req.params;
         //get postid from query
@@ -559,7 +559,7 @@ const deleteComment = async (req:CreatePostRequest,res:Response,next:NextFunctio
     try {
        
         //get userid from the jwtAuth middleware
-        const userId = req.user?.id;
+        const userId = req.user?._id;
         //get friendid from the params
         const { friendId } = req.params;
         //get postid from query
