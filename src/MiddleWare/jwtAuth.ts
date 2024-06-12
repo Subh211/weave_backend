@@ -16,7 +16,9 @@ declare module 'express-serve-static-core' {
 }
 
 const jwtAuth = (req: Request, res: Response, next: NextFunction): void => {
-    const token = (req.cookies && req.cookies.token) || null;
+    const token = (req.cookies && req.cookies.token) || req.headers.authorization?.split(' ')[1] || null;
+
+    console.log("Token received:", token);
 
     //If token dont exist throw an error
     if (!token) {
@@ -35,6 +37,7 @@ const jwtAuth = (req: Request, res: Response, next: NextFunction): void => {
 
         //Injecting id and email to req.user
         req.user = { _id: payload._id, email: payload.email, displayName: payload.displayName };
+        console.log("User payload:", req.user);
     } catch (error) {
         res.status(400).json({
             success: false,
