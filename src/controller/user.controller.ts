@@ -373,11 +373,6 @@ const updateUser = async ( req: Request , res : Response , next: NextFunction ) 
         //Get the user id from jwtAuth middleware
         const userId = req.user?.id;
 
-        //If user dont give the username
-        if ( !displayName || !name || !bio || !photoURL ) {
-            return next(new AppError("You have to fill atleast one field", 400)) as unknown as Response;
-        }
-
         //Regex for user name
         const usernameRegex: RegExp = /^[a-z_-]+$/;
 
