@@ -142,7 +142,7 @@ const registerUserByEmail = async (req: MulterFilesRequest, res: Response, next:
             success: true,
             message: 'User registered successfully',
             user:user,
-            token:user
+            token:token
         });
 
     } catch (error) {
@@ -199,7 +199,7 @@ const signin = async (req: Request, res: Response, next: NextFunction): Promise<
 
         res.status(200).json({
             message:"Sign in successfull",
-            token:user,
+            token:token,
             success: true,
             data: user
         });
