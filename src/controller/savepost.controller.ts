@@ -18,7 +18,7 @@ interface SavePostRequest extends Request {
 const savePost = async (req: SavePostRequest, res: Response, next: NextFunction) => {
     try {
         // Getting userId from the jwtAuth middleware
-        const userId = req.user?._id;
+        const userId = req.user?.id;
         const { friendId } = req.params;
         const { postId } = req.query;
 

@@ -22,7 +22,7 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
         //////// get all posts of my followings
 
         //ger userid from jwtAuth middleware
-        const userId = req.user?._id;
+        const userId = req.user?.id;
 
         //if no user found---return an error
         if (!userId) {

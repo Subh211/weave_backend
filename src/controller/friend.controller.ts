@@ -16,7 +16,7 @@ interface makeFriendRequest extends Request {
 const makeFriend = async (req: makeFriendRequest, res: Response, next: NextFunction) => {
 try {
     //get userId from jwtAuth middleware
-    const  userId  = req.user?._id;
+    const  userId  = req.user?.id;
     //get frriendId from the params
     const { friendId } = req.params;
 
@@ -169,7 +169,7 @@ const deleteFriend = async (req: makeFriendRequest, res: Response, next: NextFun
 try {
 
     //get userId from jwtAuth middleware
-    const  userId  = req.user?._id;
+    const  userId  = req.user?.id;
     //get friend id from params
     const { friendId } = req.params;
     
