@@ -359,19 +359,401 @@ const changePassword = async ( req: Request , res : Response , next: NextFunctio
 }
 
 
+// //Update user function
+// const updateUser = async ( req: Request , res : Response , next: NextFunction ) : Promise <Response | void> => {
+
+//     try {
+        
+//         //Get the new username as userName from body
+//         const { displayName , name , bio } = req.body;
+
+//         //Get the new image as photoURL from body
+//         let photoURL = req.body.photoURL;
+
+//         //Get the user id from jwtAuth middleware
+//         const userId = req.user?.id;
+
+//         //Regex for user name
+//         const usernameRegex: RegExp = /^[a-z_-]+$/;
+
+//         //Validate the regex with user given input
+//         if (!usernameRegex.test(displayName)) {
+//             return next(new AppError("Username should be in small letter & contains only _ and -", 400)) as unknown as Response;
+//         }
+
+//         //Find the user by user id
+//         const user =  await User.findById(userId);
+
+//         //If user does not exist in the database
+//         if ( !user ) {
+//             return next(new AppError("User not found", 400)) as unknown as Response;
+//         }
+
+//         //If user exists,update its displayName value
+//         if ( displayName ) {
+//             user.displayName = displayName;
+
+//             //Save the user
+//             await user.save()
+//         }
+
+//         if ( displayName && name ) {
+//             user.displayName = displayName;
+//             user.name = name
+
+//             //Save the user
+//             await user.save()
+//         }
+
+//         if ( displayName && bio ) {
+//             user.displayName = displayName;
+//             user.bio = bio
+
+//             //Save the user
+//             await user.save()
+//         }
+
+//         if ( name ) {
+//             user.name = name;
+
+//             //Save the user
+//             await user.save()
+//         }
+
+//         if ( name && bio ) {
+//             user.name = name;
+//             user.bio = bio
+
+//             //Save the user
+//             await user.save()
+//         }
+
+//         if ( bio ) {
+//             user.bio = bio;
+
+//             //Save the user
+//             await user.save()
+//         }
+    
+//         //If user wants to update profile picture
+//         if (req.file) {
+
+//             //If already profile picture exists,then delete it
+//             if (user.photoURL) {
+//                 await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
+//             }
+
+//             //Uploading the profile picture to clodinary
+//             const file = req.file;
+//             const result = await cloudinaryV2.uploader.upload(file.path, {
+//                 folder: 'lms',
+//                 width: 250,
+//                 height: 250,
+//                 gravity: 'faces',
+//                 crop: 'fill'
+//             });
+
+//             //The new values of the photoURL will be---
+//             photoURL = {
+//                 public_id: result.public_id,
+//                 secure_url: result.secure_url
+//             };
+
+//             //Update the existing value of profile picture with the new one
+//             user.photoURL = photoURL;
+
+//             //Save the user
+//             await user.save();
+
+//             //Wait until the deletion of new profic picture from local
+//             await fs.unlink(file.path);
+//         }
+
+//         if (req.file && displayName) {
+
+//             //If already profile picture exists,then delete it
+//             if (user.photoURL) {
+//                 await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
+//             }
+
+//             //Uploading the profile picture to clodinary
+//             const file = req.file;
+//             const result = await cloudinaryV2.uploader.upload(file.path, {
+//                 folder: 'lms',
+//                 width: 250,
+//                 height: 250,
+//                 gravity: 'faces',
+//                 crop: 'fill'
+//             });
+
+//             //The new values of the photoURL will be---
+//             photoURL = {
+//                 public_id: result.public_id,
+//                 secure_url: result.secure_url
+//             };
+
+//             //Update the existing value of profile picture with the new one
+//             user.photoURL = photoURL;
+//             user.displayName = displayName;
+
+//             //Save the user
+//             await user.save();
+
+//             //Wait until the deletion of new profic picture from local
+//             await fs.unlink(file.path);
+//         }
+
+//         if (req.file && name) {
+
+//             //If already profile picture exists,then delete it
+//             if (user.photoURL) {
+//                 await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
+//             }
+
+//             //Uploading the profile picture to clodinary
+//             const file = req.file;
+//             const result = await cloudinaryV2.uploader.upload(file.path, {
+//                 folder: 'lms',
+//                 width: 250,
+//                 height: 250,
+//                 gravity: 'faces',
+//                 crop: 'fill'
+//             });
+
+//             //The new values of the photoURL will be---
+//             photoURL = {
+//                 public_id: result.public_id,
+//                 secure_url: result.secure_url
+//             };
+
+//             //Update the existing value of profile picture with the new one
+//             user.photoURL = photoURL;
+//             user.name = name;
+
+//             //Save the user
+//             await user.save();
+
+//             //Wait until the deletion of new profic picture from local
+//             await fs.unlink(file.path);
+//         }
+
+//         if (req.file && bio) {
+
+//             //If already profile picture exists,then delete it
+//             if (user.photoURL) {
+//                 await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
+//             }
+
+//             //Uploading the profile picture to clodinary
+//             const file = req.file;
+//             const result = await cloudinaryV2.uploader.upload(file.path, {
+//                 folder: 'lms',
+//                 width: 250,
+//                 height: 250,
+//                 gravity: 'faces',
+//                 crop: 'fill'
+//             });
+
+//             //The new values of the photoURL will be---
+//             photoURL = {
+//                 public_id: result.public_id,
+//                 secure_url: result.secure_url
+//             };
+
+//             //Update the existing value of profile picture with the new one
+//             user.photoURL = photoURL;
+//             user.bio = bio;
+
+//             //Save the user
+//             await user.save();
+
+//             //Wait until the deletion of new profic picture from local
+//             await fs.unlink(file.path);
+//         }
+
+//         if (req.file && displayName && bio && name) {
+
+//             //If already profile picture exists,then delete it
+//             if (user.photoURL) {
+//                 await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
+//             }
+
+//             //Uploading the profile picture to clodinary
+//             const file = req.file;
+//             const result = await cloudinaryV2.uploader.upload(file.path, {
+//                 folder: 'lms',
+//                 width: 250,
+//                 height: 250,
+//                 gravity: 'faces',
+//                 crop: 'fill'
+//             });
+
+//             //The new values of the photoURL will be---
+//             photoURL = {
+//                 public_id: result.public_id,
+//                 secure_url: result.secure_url
+//             };
+
+//             //Update the existing value of profile picture with the new one
+//             user.photoURL = photoURL;
+//             user.displayName = displayName;
+//             user.bio = bio;
+//             user.name = name;
+
+//             //Save the user
+//             await user.save();
+
+//             //Wait until the deletion of new profic picture from local
+//             await fs.unlink(file.path);
+//         }
+
+//         if (req.file && bio && displayName) {
+
+//             //If already profile picture exists,then delete it
+//             if (user.photoURL) {
+//                 await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
+//             }
+
+//             //Uploading the profile picture to clodinary
+//             const file = req.file;
+//             const result = await cloudinaryV2.uploader.upload(file.path, {
+//                 folder: 'lms',
+//                 width: 250,
+//                 height: 250,
+//                 gravity: 'faces',
+//                 crop: 'fill'
+//             });
+
+//             //The new values of the photoURL will be---
+//             photoURL = {
+//                 public_id: result.public_id,
+//                 secure_url: result.secure_url
+//             };
+
+//             //Update the existing value of profile picture with the new one
+//             user.photoURL = photoURL;
+//             user.bio = bio;
+//             user.displayName = displayName;
+
+//             //Save the user
+//             await user.save();
+
+//             //Wait until the deletion of new profic picture from local
+//             await fs.unlink(file.path);
+//         }
+
+//         if (req.file && bio && name) {
+
+//             //If already profile picture exists,then delete it
+//             if (user.photoURL) {
+//                 await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
+//             }
+
+//             //Uploading the profile picture to clodinary
+//             const file = req.file;
+//             const result = await cloudinaryV2.uploader.upload(file.path, {
+//                 folder: 'lms',
+//                 width: 250,
+//                 height: 250,
+//                 gravity: 'faces',
+//                 crop: 'fill'
+//             });
+
+//             //The new values of the photoURL will be---
+//             photoURL = {
+//                 public_id: result.public_id,
+//                 secure_url: result.secure_url
+//             };
+
+//             //Update the existing value of profile picture with the new one
+//             user.photoURL = photoURL;
+//             user.bio = bio;
+//             user.name = name;
+
+//             //Save the user
+//             await user.save();
+
+//             //Wait until the deletion of new profic picture from local
+//             await fs.unlink(file.path);
+//         }
+
+//         if (req.file && name && displayName) {
+
+//             //If already profile picture exists,then delete it
+//             if (user.photoURL) {
+//                 await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
+//             }
+
+//             //Uploading the profile picture to clodinary
+//             const file = req.file;
+//             const result = await cloudinaryV2.uploader.upload(file.path, {
+//                 folder: 'lms',
+//                 width: 250,
+//                 height: 250,
+//                 gravity: 'faces',
+//                 crop: 'fill'
+//             });
+
+//             //The new values of the photoURL will be---
+//             photoURL = {
+//                 public_id: result.public_id,
+//                 secure_url: result.secure_url
+//             };
+
+//             //Update the existing value of profile picture with the new one
+//             user.photoURL = photoURL;
+//             user.name = name;
+//             user.displayName = displayName;
+
+//             //Save the user
+//             await user.save();
+
+//             //Wait until the deletion of new profic picture from local
+//             await fs.unlink(file.path);
+//         }
+
+
+
+
+//         //Save the user again
+//         await user.save();
+
+//         //Show response
+//         res.status(200).json({
+//             success:true,
+//             message:"Profile updated successfully",
+//             data:user
+//         })
+
+//     } catch (error) {
+//         // Internal server error handling
+//         if (error instanceof Error) {
+//             next(new AppError(`Internal server error: ${error.message}`, 500));
+//         } else {
+//             next(new AppError("Internal server error", 500));
+//         }
+//     }
+
+// }
+
 //Update user function
 const updateUser = async ( req: Request , res : Response , next: NextFunction ) : Promise <Response | void> => {
 
     try {
         
         //Get the new username as userName from body
-        const { displayName , name , bio } = req.body;
+        const { displayName } = req.body;
 
         //Get the new image as photoURL from body
         let photoURL = req.body.photoURL;
 
         //Get the user id from jwtAuth middleware
         const userId = req.user?.id;
+
+        //If user dont give the username
+        if ( !displayName ) {
+            return next(new AppError("Please enter your new user name", 400)) as unknown as Response;
+        }
 
         //Regex for user name
         const usernameRegex: RegExp = /^[a-z_-]+$/;
@@ -392,44 +774,6 @@ const updateUser = async ( req: Request , res : Response , next: NextFunction ) 
         //If user exists,update its displayName value
         if ( displayName ) {
             user.displayName = displayName;
-
-            //Save the user
-            await user.save()
-        }
-
-        if ( displayName && name ) {
-            user.displayName = displayName;
-            user.name = name
-
-            //Save the user
-            await user.save()
-        }
-
-        if ( displayName && bio ) {
-            user.displayName = displayName;
-            user.bio = bio
-
-            //Save the user
-            await user.save()
-        }
-
-        if ( name ) {
-            user.name = name;
-
-            //Save the user
-            await user.save()
-        }
-
-        if ( name && bio ) {
-            user.name = name;
-            user.bio = bio
-
-            //Save the user
-            await user.save()
-        }
-
-        if ( bio ) {
-            user.bio = bio;
 
             //Save the user
             await user.save()
@@ -469,259 +813,13 @@ const updateUser = async ( req: Request , res : Response , next: NextFunction ) 
             await fs.unlink(file.path);
         }
 
-        if (req.file && displayName) {
-
-            //If already profile picture exists,then delete it
-            if (user.photoURL) {
-                await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
-            }
-
-            //Uploading the profile picture to clodinary
-            const file = req.file;
-            const result = await cloudinaryV2.uploader.upload(file.path, {
-                folder: 'lms',
-                width: 250,
-                height: 250,
-                gravity: 'faces',
-                crop: 'fill'
-            });
-
-            //The new values of the photoURL will be---
-            photoURL = {
-                public_id: result.public_id,
-                secure_url: result.secure_url
-            };
-
-            //Update the existing value of profile picture with the new one
-            user.photoURL = photoURL;
-            user.displayName = displayName;
-
-            //Save the user
-            await user.save();
-
-            //Wait until the deletion of new profic picture from local
-            await fs.unlink(file.path);
-        }
-
-        if (req.file && name) {
-
-            //If already profile picture exists,then delete it
-            if (user.photoURL) {
-                await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
-            }
-
-            //Uploading the profile picture to clodinary
-            const file = req.file;
-            const result = await cloudinaryV2.uploader.upload(file.path, {
-                folder: 'lms',
-                width: 250,
-                height: 250,
-                gravity: 'faces',
-                crop: 'fill'
-            });
-
-            //The new values of the photoURL will be---
-            photoURL = {
-                public_id: result.public_id,
-                secure_url: result.secure_url
-            };
-
-            //Update the existing value of profile picture with the new one
-            user.photoURL = photoURL;
-            user.name = name;
-
-            //Save the user
-            await user.save();
-
-            //Wait until the deletion of new profic picture from local
-            await fs.unlink(file.path);
-        }
-
-        if (req.file && bio) {
-
-            //If already profile picture exists,then delete it
-            if (user.photoURL) {
-                await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
-            }
-
-            //Uploading the profile picture to clodinary
-            const file = req.file;
-            const result = await cloudinaryV2.uploader.upload(file.path, {
-                folder: 'lms',
-                width: 250,
-                height: 250,
-                gravity: 'faces',
-                crop: 'fill'
-            });
-
-            //The new values of the photoURL will be---
-            photoURL = {
-                public_id: result.public_id,
-                secure_url: result.secure_url
-            };
-
-            //Update the existing value of profile picture with the new one
-            user.photoURL = photoURL;
-            user.bio = bio;
-
-            //Save the user
-            await user.save();
-
-            //Wait until the deletion of new profic picture from local
-            await fs.unlink(file.path);
-        }
-
-        if (req.file && displayName && bio && name) {
-
-            //If already profile picture exists,then delete it
-            if (user.photoURL) {
-                await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
-            }
-
-            //Uploading the profile picture to clodinary
-            const file = req.file;
-            const result = await cloudinaryV2.uploader.upload(file.path, {
-                folder: 'lms',
-                width: 250,
-                height: 250,
-                gravity: 'faces',
-                crop: 'fill'
-            });
-
-            //The new values of the photoURL will be---
-            photoURL = {
-                public_id: result.public_id,
-                secure_url: result.secure_url
-            };
-
-            //Update the existing value of profile picture with the new one
-            user.photoURL = photoURL;
-            user.displayName = displayName;
-            user.bio = bio;
-            user.name = name;
-
-            //Save the user
-            await user.save();
-
-            //Wait until the deletion of new profic picture from local
-            await fs.unlink(file.path);
-        }
-
-        if (req.file && bio && displayName) {
-
-            //If already profile picture exists,then delete it
-            if (user.photoURL) {
-                await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
-            }
-
-            //Uploading the profile picture to clodinary
-            const file = req.file;
-            const result = await cloudinaryV2.uploader.upload(file.path, {
-                folder: 'lms',
-                width: 250,
-                height: 250,
-                gravity: 'faces',
-                crop: 'fill'
-            });
-
-            //The new values of the photoURL will be---
-            photoURL = {
-                public_id: result.public_id,
-                secure_url: result.secure_url
-            };
-
-            //Update the existing value of profile picture with the new one
-            user.photoURL = photoURL;
-            user.bio = bio;
-            user.displayName = displayName;
-
-            //Save the user
-            await user.save();
-
-            //Wait until the deletion of new profic picture from local
-            await fs.unlink(file.path);
-        }
-
-        if (req.file && bio && name) {
-
-            //If already profile picture exists,then delete it
-            if (user.photoURL) {
-                await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
-            }
-
-            //Uploading the profile picture to clodinary
-            const file = req.file;
-            const result = await cloudinaryV2.uploader.upload(file.path, {
-                folder: 'lms',
-                width: 250,
-                height: 250,
-                gravity: 'faces',
-                crop: 'fill'
-            });
-
-            //The new values of the photoURL will be---
-            photoURL = {
-                public_id: result.public_id,
-                secure_url: result.secure_url
-            };
-
-            //Update the existing value of profile picture with the new one
-            user.photoURL = photoURL;
-            user.bio = bio;
-            user.name = name;
-
-            //Save the user
-            await user.save();
-
-            //Wait until the deletion of new profic picture from local
-            await fs.unlink(file.path);
-        }
-
-        if (req.file && name && displayName) {
-
-            //If already profile picture exists,then delete it
-            if (user.photoURL) {
-                await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
-            }
-
-            //Uploading the profile picture to clodinary
-            const file = req.file;
-            const result = await cloudinaryV2.uploader.upload(file.path, {
-                folder: 'lms',
-                width: 250,
-                height: 250,
-                gravity: 'faces',
-                crop: 'fill'
-            });
-
-            //The new values of the photoURL will be---
-            photoURL = {
-                public_id: result.public_id,
-                secure_url: result.secure_url
-            };
-
-            //Update the existing value of profile picture with the new one
-            user.photoURL = photoURL;
-            user.name = name;
-            user.displayName = displayName;
-
-            //Save the user
-            await user.save();
-
-            //Wait until the deletion of new profic picture from local
-            await fs.unlink(file.path);
-        }
-
-
-
-
         //Save the user again
         await user.save();
 
         //Show response
         res.status(200).json({
             success:true,
-            message:"Profile updated successfully",
+            message:"Username and avatar updated successfully",
             data:user
         })
 
@@ -735,6 +833,7 @@ const updateUser = async ( req: Request , res : Response , next: NextFunction ) 
     }
 
 }
+
 
 
 //Delete user function
