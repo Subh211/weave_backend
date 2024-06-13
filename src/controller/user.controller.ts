@@ -737,65 +737,148 @@ const changePassword = async ( req: Request , res : Response , next: NextFunctio
 // }
 
 //Update user function
-const updateUser = async ( req: Request , res : Response , next: NextFunction ) : Promise <Response | void> => {
+// const updateUser = async ( req: Request , res : Response , next: NextFunction ) : Promise <Response | void> => {
 
-    try {
+//     try {
         
-        //Get the new username as userName from body
-        const { displayName , bio } = req.body;
+//         //Get the new username as userName from body
+//         const { displayName , bio } = req.body;
 
-        //Get the new image as photoURL from body
+//         //Get the new image as photoURL from body
+//         let photoURL = req.body.photoURL;
+
+//         //Get the user id from jwtAuth middleware
+//         const userId = req.user?.id;
+
+//         //If user dont give the username
+//         if ( !displayName && !bio) {
+//             return next(new AppError("Please enter at least one field", 400)) as unknown as Response;
+//         }
+
+//         //Regex for user name
+//         const usernameRegex: RegExp = /^[a-z_-]+$/;
+
+//         //Validate the regex with user given input
+//         if (!usernameRegex.test(displayName)) {
+//             return next(new AppError("Username should be in small letter & contains only _ and -", 400)) as unknown as Response;
+//         }
+
+//         //Find the user by user id
+//         const user =  await User.findById(userId);
+
+//         //If user does not exist in the database
+//         if ( !user ) {
+//             return next(new AppError("User not found", 400)) as unknown as Response;
+//         }
+
+//         //If user exists,update its displayName value
+//         if ( displayName ) {
+//             user.displayName = displayName;
+
+//             //Save the user
+//             await user.save()
+//         }
+
+//         //If user exists,update its bio value
+//         if ( displayName ) {
+//             user.bio = bio;
+
+//             //Save the user
+//             await user.save()
+//         }
+    
+//         //If user wants to update profile picture
+//         if (req.file) {
+
+//             //If already profile picture exists,then delete it
+//             if (user.photoURL) {
+//                 await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
+//             }
+
+//             //Uploading the profile picture to clodinary
+//             const file = req.file;
+//             const result = await cloudinaryV2.uploader.upload(file.path, {
+//                 folder: 'lms',
+//                 width: 250,
+//                 height: 250,
+//                 gravity: 'faces',
+//                 crop: 'fill'
+//             });
+
+//             //The new values of the photoURL will be---
+//             photoURL = {
+//                 public_id: result.public_id,
+//                 secure_url: result.secure_url
+//             };
+
+//             //Update the existing value of profile picture with the new one
+//             user.photoURL = photoURL;
+
+//             //Save the user
+//             await user.save();
+
+//             //Wait until the deletion of new profic picture from local
+//             await fs.unlink(file.path);
+//         }
+
+//         //Save the user again
+//         await user.save();
+
+//         //Show response
+//         res.status(200).json({
+//             success:true,
+//             message:"Username and avatar updated successfully",
+//             data:user
+//         })
+
+//     } catch (error) {
+//         // Internal server error handling
+//         if (error instanceof Error) {
+//             next(new AppError(`Internal server error: ${error.message}`, 500));
+//         } else {
+//             next(new AppError("Internal server error", 500));
+//         }
+//     }
+
+// }
+
+
+//Update user function
+const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+    try {
+        const { displayName, bio } = req.body;
         let photoURL = req.body.photoURL;
-
-        //Get the user id from jwtAuth middleware
         const userId = req.user?.id;
 
-        //If user dont give the username
-        if ( !displayName && !bio) {
+        if (!displayName && !bio) {
             return next(new AppError("Please enter at least one field", 400)) as unknown as Response;
         }
 
-        //Regex for user name
         const usernameRegex: RegExp = /^[a-z_-]+$/;
 
-        //Validate the regex with user given input
-        if (!usernameRegex.test(displayName)) {
+        if (displayName && !usernameRegex.test(displayName)) {
             return next(new AppError("Username should be in small letter & contains only _ and -", 400)) as unknown as Response;
         }
 
-        //Find the user by user id
-        const user =  await User.findById(userId);
+        const user = await User.findById(userId);
 
-        //If user does not exist in the database
-        if ( !user ) {
+        if (!user) {
             return next(new AppError("User not found", 400)) as unknown as Response;
         }
 
-        //If user exists,update its displayName value
-        if ( displayName ) {
+        if (displayName) {
             user.displayName = displayName;
-
-            //Save the user
-            await user.save()
         }
 
-        //If user exists,update its bio value
-        if ( displayName ) {
+        if (bio) {
             user.bio = bio;
-
-            //Save the user
-            await user.save()
         }
-    
-        //If user wants to update profile picture
-        if (req.file) {
 
-            //If already profile picture exists,then delete it
+        if (req.file) {
             if (user.photoURL) {
                 await cloudinaryV2.uploader.destroy(user.photoURL.public_id);
             }
 
-            //Uploading the profile picture to clodinary
             const file = req.file;
             const result = await cloudinaryV2.uploader.upload(file.path, {
                 folder: 'lms',
@@ -805,42 +888,31 @@ const updateUser = async ( req: Request , res : Response , next: NextFunction ) 
                 crop: 'fill'
             });
 
-            //The new values of the photoURL will be---
             photoURL = {
                 public_id: result.public_id,
                 secure_url: result.secure_url
             };
 
-            //Update the existing value of profile picture with the new one
             user.photoURL = photoURL;
-
-            //Save the user
-            await user.save();
-
-            //Wait until the deletion of new profic picture from local
             await fs.unlink(file.path);
         }
 
-        //Save the user again
         await user.save();
 
-        //Show response
         res.status(200).json({
-            success:true,
-            message:"Username and avatar updated successfully",
-            data:user
-        })
-
+            success: true,
+            message: "User profile updated successfully",
+            data: user
+        });
     } catch (error) {
-        // Internal server error handling
         if (error instanceof Error) {
             next(new AppError(`Internal server error: ${error.message}`, 500));
         } else {
             next(new AppError("Internal server error", 500));
         }
     }
+};
 
-}
 
 
 
