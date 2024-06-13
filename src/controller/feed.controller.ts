@@ -47,6 +47,8 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
 
         //interface for postdetail array
         type PostDetail = {
+            friendId?: string | any;
+            postId?: string | undefined;
             image_public_id?: string | undefined;
             image_secure_url?: string | undefined;
             name: string | undefined;
@@ -73,6 +75,8 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
             const userName = user?.displayName;
             const userSecureImageUrl = user?.photoURL?.secure_url;
             const userImagePublicId = user?.photoURL?.public_id;
+            const friendId = friendIds[i];
+    
 
             //get the users all posts from Post
             const post = await Post.findOne({ userId: userIdObject });
@@ -94,6 +98,8 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
 
                             //fill the details 
                             const eachPosts: PostDetail = {
+                                postId:currentPostId,
+                                friendId:friendId,
                                 image_public_id:userImagePublicId,
                                 image_secure_url:userSecureImageUrl,
                                 name: userName,
@@ -151,6 +157,7 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
                 const userName = user?.displayName;
                 const userSecureImageUrl = user?.photoURL?.secure_url;
                 const userImagePublicId = user?.photoURL?.public_id;
+                const friendId = restUsersThanMyFollowings[i];
 
                 //get the users all posts from Post
                 const post = await Post.findOne({ userId: userIdObject });
@@ -172,6 +179,8 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
 
                                 //fill the details 
                                 const eachPosts: PostDetail = {
+                                    postId:currentPostId,
+                                    friendId:friendId,
                                     image_public_id:userImagePublicId,
                                     image_secure_url:userSecureImageUrl,
                                     name: userName,
