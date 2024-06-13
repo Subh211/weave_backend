@@ -47,6 +47,8 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
 
         //interface for postdetail array
         type PostDetail = {
+            image_public_id?: string | undefined;
+            image_secure_url?: string | undefined;
             name: string | undefined;
             caption: string | undefined;
             likes: { userId?: string; userName?: string; isLiked?: boolean }[] | undefined;
@@ -67,8 +69,10 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
             //find the user from User
             const user = await User.findOne({ _id: userIdObject });
 
-            //get his displayname
+            //get his displayname and profile picture and secureUrl
             const userName = user?.displayName;
+            const userSecureImageUrl = user?.photoURL?.secure_url;
+            const userImagePublicId = user?.photoURL?.public_id;
 
             //get the users all posts from Post
             const post = await Post.findOne({ userId: userIdObject });
@@ -90,6 +94,8 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
 
                             //fill the details 
                             const eachPosts: PostDetail = {
+                                image_public_id:userImagePublicId,
+                                image_secure_url:userSecureImageUrl,
                                 name: userName,
                                 caption: userPostDetails[j].caption,
                                 likes: userPostDetails[j].likes,
@@ -141,8 +147,10 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
                 //find the user from User
                 const user = await User.findOne({ _id: userIdObject });
 
-                //get his displayname
+                //get his displayname & public id and secure url
                 const userName = user?.displayName;
+                const userSecureImageUrl = user?.photoURL?.secure_url;
+                const userImagePublicId = user?.photoURL?.public_id;
 
                 //get the users all posts from Post
                 const post = await Post.findOne({ userId: userIdObject });
@@ -164,6 +172,8 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
 
                                 //fill the details 
                                 const eachPosts: PostDetail = {
+                                    image_public_id:userImagePublicId,
+                                    image_secure_url:userSecureImageUrl,
                                     name: userName,
                                     caption: userPostDetails[j].caption,
                                     likes: userPostDetails[j].likes,
