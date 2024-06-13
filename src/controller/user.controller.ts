@@ -742,7 +742,7 @@ const updateUser = async ( req: Request , res : Response , next: NextFunction ) 
     try {
         
         //Get the new username as userName from body
-        const { displayName } = req.body;
+        const { displayName , bio } = req.body;
 
         //Get the new image as photoURL from body
         let photoURL = req.body.photoURL;
@@ -751,8 +751,8 @@ const updateUser = async ( req: Request , res : Response , next: NextFunction ) 
         const userId = req.user?.id;
 
         //If user dont give the username
-        if ( !displayName ) {
-            return next(new AppError("Please enter your new user name", 400)) as unknown as Response;
+        if ( !displayName && !bio) {
+            return next(new AppError("Please enter at least one field", 400)) as unknown as Response;
         }
 
         //Regex for user name
@@ -774,6 +774,14 @@ const updateUser = async ( req: Request , res : Response , next: NextFunction ) 
         //If user exists,update its displayName value
         if ( displayName ) {
             user.displayName = displayName;
+
+            //Save the user
+            await user.save()
+        }
+
+        //If user exists,update its bio value
+        if ( displayName ) {
+            user.bio = bio;
 
             //Save the user
             await user.save()
