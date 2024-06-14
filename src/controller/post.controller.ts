@@ -344,9 +344,10 @@ const likePost = async (req: CreatePostRequest, res: Response, next: NextFunctio
     const postIdObject = new mongoose.Types.ObjectId(postId);
     const friendIdObject =new mongoose.Types.ObjectId(friendId);
 
-    //find the user who will like the post and get his username
+    //find the user who will like the post and get his username & image
      const user = await User.findById(userId);
      let likedUserName = user?.displayName
+     let likedUserImage = user?.photoURL?.secure_url
 
     //To know that is he already liked the post or not
     const isAlreadyLiked = await Post.findOne(
@@ -367,7 +368,8 @@ const likePost = async (req: CreatePostRequest, res: Response, next: NextFunctio
             "posts.$.likes": {
               userId: userIdObject,
               userName: likedUserName,
-              isLiked: true
+              isLiked: true,
+              userImage:likedUserImage
             }
           }
         }
@@ -501,9 +503,10 @@ const createComment = async (req:CreatePostRequest,res:Response,next:NextFunctio
         const postIdObject = new mongoose.Types.ObjectId(postId);
         const friendIdObject =new mongoose.Types.ObjectId(friendId);
 
-        //get the user who will comment and get his displayName
+        //get the user who will comment and get his displayName & image
         const user = await User.findById(userId);
         let commentedUserName = user?.displayName
+        let commendtedUserImage = user?.photoURL?.secure_url
 
         //now update the post with the comment from that user
         const updatedResult = await Post.updateOne(
@@ -513,7 +516,8 @@ const createComment = async (req:CreatePostRequest,res:Response,next:NextFunctio
                 "posts.$.comments": {
                 comment: comment,
                 userId: userIdObject,
-                userName: commentedUserName
+                userName: commentedUserName,
+                userImage: commendtedUserImage
                 }
             }
             }

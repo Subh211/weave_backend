@@ -53,8 +53,8 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
             image_secure_url?: string | undefined;
             name: string | undefined;
             caption: string | undefined;
-            likes: { userId?: string; userName?: string; isLiked?: boolean }[] | undefined;
-            comments: { comment: string; userId: string; userName: string }[] | undefined;
+            likes: { userId?: string; userName?: string; isLiked?: boolean , userImage?: string}[] | undefined;
+            comments: { comment: string; userId: string; userName: string , userImage?: string}[] | undefined;
             picture_public_id: string | undefined;
             picture_secure_url: string | undefined;
         };
@@ -108,7 +108,8 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
                                 comments: userPostDetails[j].comments?.map(comment => ({
                                     comment: comment.comment || "",
                                     userId: comment.userId || "",
-                                    userName: comment.userName || ""
+                                    userName: comment.userName || "",
+                                    userImage:comment.userImage || "",
                                 })),
                                 picture_public_id: userPostDetails[j]?.image?.public_id,
                                 picture_secure_url: userPostDetails[j]?.image?.secure_url
@@ -189,7 +190,8 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
                                     comments: userPostDetails[j].comments?.map(comment => ({
                                         comment: comment.comment || "",
                                         userId: comment.userId || "",
-                                        userName: comment.userName || ""
+                                        userName: comment.userName || "",
+                                        userImage:comment.userImage || "",
                                     })),
                                     picture_public_id: userPostDetails[j]?.image?.public_id,
                                     picture_secure_url: userPostDetails[j]?.image?.secure_url

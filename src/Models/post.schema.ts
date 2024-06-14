@@ -16,11 +16,13 @@ interface IPost extends Document {
         };
         caption?: string;
         comments?: Array<{
+            userImage: string;
             userId?: string;
             userName?: string;
             comment?: string;
         }>;
         likes?: Array<{
+            userImage: string;
             userId?: string;
             userName?: string;
             isLiked?: boolean;
@@ -58,7 +60,10 @@ const postSchema: Schema<IPost> = new Schema(
                     type: String,
                 },
                 comments: [
-                    {
+                    {   
+                        userImage: {
+                            type: String,
+                        },
                         userId: {
                             type: String,
                         },
@@ -72,6 +77,9 @@ const postSchema: Schema<IPost> = new Schema(
                 ],
                 likes: [
                     {
+                        userImage: {
+                            type: String,
+                        },
                         userId: {
                             type: String,
                         },
