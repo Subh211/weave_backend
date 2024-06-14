@@ -645,7 +645,7 @@ const getLikeScreen = async (req:CreatePostRequest,res:Response,next:NextFunctio
 
         //find the post
         const post = await Post.findOne(
-            { userId: friendIdObject, "posts._id": postIdObject },
+            { userId: friendId, "posts._id": postIdObject },
             { "posts.$": 1 }
           );
           
@@ -684,7 +684,7 @@ const getCommentScreen = async (req:CreatePostRequest,res:Response,next:NextFunc
 
         //find the post
         const post = await Post.findOne(
-            { userId: friendIdObject, "posts._id": postIdObject },
+            { userId: friendId, "posts._id": postIdObject },
             { "posts.$": 1 }
           );
           
