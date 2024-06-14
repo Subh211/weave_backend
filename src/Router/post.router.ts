@@ -41,11 +41,11 @@ postRouter
   .get(jwtAuth,savePost)
 
 postRouter
-  .route("alllikes/:friendId")
+  .route("/alllikes/:friendId")
   .get(getLikeScreen)
 
   postRouter
-  .route("allcomments/:friendId")
+  .route("/allcomments/:friendId")
   .get(getCommentScreen)
 
 
