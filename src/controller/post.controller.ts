@@ -621,7 +621,7 @@ const deleteComment = async (req:CreatePostRequest,res:Response,next:NextFunctio
     
           res.status(200).json({
             success:true,
-            message:"Comment removed",
+            message:"Here is your like page",
             data:postResult.posts[0]
           })
     
@@ -632,6 +632,85 @@ const deleteComment = async (req:CreatePostRequest,res:Response,next:NextFunctio
         }
 }
 
+
+//get all likes
+const getLikeScreen = async (req:CreatePostRequest,res:Response,next:NextFunction) => {
+    try {
+        //get friendId and postId
+        const { friendId } = req.params;
+        const { postId } = req.query;
+
+        const postIdObject = new mongoose.Types.ObjectId(postId);
+        const friendIdObject =new mongoose.Types.ObjectId(friendId);
+
+        //find the post
+        const post = await Post.findOne(
+            { userId: friendIdObject, "posts._id": postIdObject },
+            { "posts.$": 1 }
+          );
+          
+          //if no posts found
+          if (!post) {
+            return next(new AppError("No posts found",200))
+          }
+
+          //get all the likes
+          const likes = post?.posts[0].likes;
+
+          res.status(200).json({
+            success:true,
+            message:"Comment removed",
+            data:likes
+          })
+
+    } catch (error:any) {
+        //error handling
+        console.error("Error occured in getting the page", error.message);
+        return next(new AppError("Internal server error", 500));
+    }
+
+}
+
+
+//get all likes
+const getCommentScreen = async (req:CreatePostRequest,res:Response,next:NextFunction) => {
+    try {
+        //get friendId and postId
+        const { friendId } = req.params;
+        const { postId } = req.query;
+
+        const postIdObject = new mongoose.Types.ObjectId(postId);
+        const friendIdObject =new mongoose.Types.ObjectId(friendId);
+
+        //find the post
+        const post = await Post.findOne(
+            { userId: friendIdObject, "posts._id": postIdObject },
+            { "posts.$": 1 }
+          );
+          
+          //if no posts found
+          if (!post) {
+            return next(new AppError("No posts found",200))
+          }
+
+          //get all the comments
+          const comments = post?.posts[0].comments;
+
+          res.status(200).json({
+            success:true,
+            message:"Here is your like page",
+            data:comments
+          })
+
+    } catch (error:any) {
+        //error handling
+        console.error("Error occured in getting the page", error.message);
+        return next(new AppError("Internal server error", 500));
+    }
+
+}
+
+
 export  {
     createPost,
     getPost,
@@ -641,5 +720,7 @@ export  {
     likePost,
     removeLike,
     createComment,
-    deleteComment
+    deleteComment,
+    getLikeScreen,
+    getCommentScreen
 };
