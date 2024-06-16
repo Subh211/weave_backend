@@ -66,9 +66,9 @@ const savePost = async (req: SavePostRequest, res: Response, next: NextFunction)
                 secure_url: friendDetails?.photoURL?.secure_url,
             },
             caption: mainPost.caption,
-            image: mainPost.image ? {
-                public_id: mainPost.image.public_id,
-                secure_url: mainPost.image.secure_url,
+            image: mainPost.photoURL ? {
+                public_id: mainPost.photoURL.public_id,
+                secure_url: mainPost.photoURL.secure_url,
             } : undefined,
             comments: mainPost.comments,
             likes: mainPost.likes
