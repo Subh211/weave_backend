@@ -111,8 +111,8 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
                                     userName: comment.userName || "",
                                     userImage:comment.userImage || "",
                                 })),
-                                picture_public_id: userPostDetails[j]?.photoURL?.public_id,
-                                picture_secure_url: userPostDetails[j]?.photoURL?.secure_url
+                                picture_public_id: userPostDetails[j]?.image?.public_id,
+                                picture_secure_url: userPostDetails[j]?.image?.secure_url
                             };
 
                             //now push each posts to the totalPost array
@@ -193,8 +193,8 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
                                         userName: comment.userName || "",
                                         userImage:comment.userImage || "",
                                     })),
-                                    picture_public_id: userPostDetails[j]?.photoURL?.public_id,
-                                    picture_secure_url: userPostDetails[j]?.photoURL?.secure_url
+                                    picture_public_id: userPostDetails[j]?.image?.public_id,
+                                    picture_secure_url: userPostDetails[j]?.image?.secure_url
                                 };
 
                                 //now push each posts to the totalPost array

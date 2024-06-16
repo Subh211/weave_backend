@@ -10,7 +10,7 @@ interface IPost extends Document {
             public_id: any;
             secure_url:any;
         };
-        photoURL?: {
+        image?: {
             public_id: string;
             secure_url: string;
         };
@@ -48,7 +48,7 @@ const postSchema: Schema<IPost> = new Schema(
                     public_id: String,
                     secure_url:String
                 },
-                photoURL: {
+                image: {
                     public_id: {
                         type: String,
                     },

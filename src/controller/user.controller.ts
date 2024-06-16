@@ -952,7 +952,7 @@ const deleteUser = async ( req: Request , res : Response , next: NextFunction ) 
         if (typeof posts === 'object' && posts !== null) {
             for (const key in posts) {
               if (posts.hasOwnProperty(key)) {
-                let photoId = posts[key].photoURL?.public_id;
+                let photoId = posts[key].image?.public_id;
       
                 if (photoId) {
                   await cloudinaryV2.uploader.destroy(photoId);

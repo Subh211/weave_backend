@@ -90,7 +90,7 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
                         secure_url: userSecureUrl,
                     },
                     caption,
-                    photoURL: {
+                    image: {
                         public_id: file.public_id,
                         secure_url: file.secure_url,
                     },
@@ -283,7 +283,7 @@ const deleteOnePost = async (req: CreatePostRequest, res: Response, next: NextFu
             }
 
             //set an variable named imagePublicId for deletion purpose of profile pic
-            const imagePublicId = post.posts[0].photoURL?.public_id;
+            const imagePublicId = post.posts[0].image?.public_id;
 
             //Delete the specific post 
             await Post.updateOne(
