@@ -21,7 +21,7 @@ interface CreatePostRequest extends Request {
     body: {
         caption: string;
         comment: string;
-        image: {
+        photoURL: {
             public_id?: string;
             secure_url?: string;
         };
@@ -37,7 +37,7 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
         //Getting caption from the body
         const { caption } = req.body;
         //Get the new image as photoURL from body
-        let image = req.body.image;
+        let photoURL = req.body.photoURL;
 
 
         //If caption is not present--throw an erroe
@@ -73,7 +73,7 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
                     crop: "fill",
                 });
 
-                image = {
+                photoURL = {
                     public_id: file.public_id,
                     secure_url: file.secure_url
                 };
@@ -90,7 +90,7 @@ const createPost = async (req: CreatePostRequest, res: Response, next: NextFunct
                         secure_url: userSecureUrl,
                     },
                     caption,
-                    image: {
+                    photoURL: {
                         public_id: file.public_id,
                         secure_url: file.secure_url,
                     },
@@ -283,7 +283,7 @@ const deleteOnePost = async (req: CreatePostRequest, res: Response, next: NextFu
             }
 
             //set an variable named imagePublicId for deletion purpose of profile pic
-            const imagePublicId = post.posts[0].image?.public_id;
+            const imagePublicId = post.posts[0].photoURL?.public_id;
 
             //Delete the specific post 
             await Post.updateOne(
