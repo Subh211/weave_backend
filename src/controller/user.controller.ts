@@ -227,7 +227,12 @@ const userDetails = async ( req: Request , res : Response , next :NextFunction )
         const userIdObject = new mongoose.Types.ObjectId(userId);
 
         //find posts of the user
-        const post = await Post.findOne({userId:userIdObject})
+        const post = await Post.findOne({userId:userIdObject});
+
+        const wholeUser = {
+            "user":user,
+            "posts":post
+        };
 
         //If user dont exists throw an error
         if (!user) {
@@ -237,8 +242,8 @@ const userDetails = async ( req: Request , res : Response , next :NextFunction )
         res.status(200).json({
             success:true,
             message:"Got user successfully",
-            user:user,
-            post:post
+            data:wholeUser,
+
         })
 
     } catch (error) {
