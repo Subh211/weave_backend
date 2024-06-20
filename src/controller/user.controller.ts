@@ -10,6 +10,7 @@ import fs from 'fs/promises';
 import crypto from 'crypto';
 import path from 'path';
 import mongoose from 'mongoose';
+import Friend from '../Models/friend.schema';
 
 
 // Extend the Request interface to include files for array-based uploads
@@ -229,9 +230,13 @@ const userDetails = async ( req: Request , res : Response , next :NextFunction )
         //find posts of the user
         const post = await Post.findOne({userId:userIdObject});
 
+        //find the friend details of user
+        const friendDetailsOfUser = await Friend.findOne({userId:userIdObject});
+
         const wholeUser = {
             "user":user,
-            "posts":post
+            "posts":post,
+            "friendDetails":friendDetailsOfUser
         };
 
         //If user dont exists throw an error
