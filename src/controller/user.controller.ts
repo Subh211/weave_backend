@@ -264,6 +264,64 @@ const userDetails = async ( req: Request , res : Response , next :NextFunction )
 }
 
 
+
+//Friend details function
+const friendDetails = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
+    
+    // Get the user id from req.user (assuming it's already set during authentication)
+    const userId = req.user?.id;
+    
+    // Extract friendId from req.params
+    const friendId: string | undefined = req.params.friendId;
+
+    if (!friendId) {
+        return next(new AppError('Friend ID not provided', 400));
+    }
+
+    try {
+        // Find the friend by unique user ID
+        const friend = await User.findById(friendId);
+
+        if (!friend) {
+            return next(new AppError('Friend not found', 404));
+        }
+
+        // Create ObjectId objects for querying
+        const userIdObject = new mongoose.Types.ObjectId(userId);
+        const friendIdObject = new mongoose.Types.ObjectId(friendId);
+
+        // Find posts of the friend
+        const posts = await Post.findOne({ userId: friendIdObject });
+
+        // Find the friend details of the friend
+        const friendDetailsOfUser = await Friend.findOne({ userId: friendIdObject });
+
+
+        const wholeUser = {
+            user: friend, // Assuming you meant to use `friend` instead of `user`
+            posts:posts,
+            friendDetails: friendDetailsOfUser,
+        };
+
+        res.status(200).json({
+            success: true,
+            message: 'Got user successfully',
+            data: wholeUser,
+        });
+
+    } catch (error) {
+        // Internal server error handling
+        if (error instanceof Error) {
+            next(new AppError(`Internal server error: ${error.message}`, 500));
+        } else {
+            next(new AppError('Internal server error', 500));
+        }
+    }
+};
+
+
+
+
 //Log out function
 const logOut = async ( req: Request , res : Response , next :NextFunction ) : Promise <Response | void> =>{
 
@@ -1007,7 +1065,8 @@ const deleteUser = async ( req: Request , res : Response , next: NextFunction ) 
 //Exporting user functions
 export { registerUserByEmail,  
         signin , 
-        userDetails , 
+        userDetails ,
+        friendDetails, 
         logOut , 
         changePassword , 
         updateUser ,
