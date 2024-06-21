@@ -309,13 +309,14 @@ const friendDetails = async (req: Request, res: Response, next: NextFunction): P
         const newResult = result.map(item => item.friendId);
 
         //check if user already follows or not
-        const isFriend = newResult.includes(userId);
+        const isFriend = newResult.includes(userId?.toString());
 
         const wholeUser = {
             user: friend, // Assuming you meant to use `friend` instead of `user`
             posts:posts,
             friendDetails: friendDetailsOfUser,
             isFriend:isFriend,
+            userId:userId?.toString()
         };
 
         res.status(200).json({
