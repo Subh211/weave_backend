@@ -306,17 +306,16 @@ const friendDetails = async (req: Request, res: Response, next: NextFunction): P
         
 
         //newResult is created for sorting purpose between my followings and rest of the users
-        //const newResult = result.map(item => item.friendId);
+        const newResult = result.map(item => item.friendId.toString());
 
-        //get only the frirndId's by mapping over result array
-        //const friendIds = result.map(doc => doc.friendId);
-
+        //check if user already follows or not
+        const isFriend = newResult.includes(userId);
 
         const wholeUser = {
             user: friend, // Assuming you meant to use `friend` instead of `user`
             posts:posts,
             friendDetails: friendDetailsOfUser,
-            isFriend:result
+            isFriend:isFriend
         };
 
         res.status(200).json({
