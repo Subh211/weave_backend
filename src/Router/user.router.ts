@@ -42,7 +42,7 @@ userRouter.get('/user', jwtAuth , (req: Request, res: Response, next: NextFuncti
 
 
 //Route for User details
-userRouter.get('/:friendId', (req: Request, res: Response, next: NextFunction) => {
+userRouter.get('/:friendId',jwtAuth, (req: Request, res: Response, next: NextFunction) => {
     friendDetails(req , res, next);
 });
 

@@ -316,9 +316,6 @@ const friendDetails = async (req: Request, res: Response, next: NextFunction): P
             posts:posts,
             friendDetails: friendDetailsOfUser,
             isFriend:isFriend,
-            newResult:newResult,
-            result:result,
-            userId:userId
         };
 
         res.status(200).json({
