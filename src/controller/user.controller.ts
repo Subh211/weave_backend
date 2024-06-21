@@ -296,11 +296,27 @@ const friendDetails = async (req: Request, res: Response, next: NextFunction): P
         // Find the friend details of the friend
         const friendDetailsOfUser = await Friend.findOne({ userId: friendIdObject });
 
+        // Use aggregation to fetch and extract friendId from followers array
+        const result = await Friend.aggregate([
+            { $match: { userId: friendIdObject } },
+            { $unwind: "$followers" },
+            { $project: { _id: 0, friendId: "$followers.friendId" } }
+        ]);
+
+        
+
+        //newResult is created for sorting purpose between my followings and rest of the users
+        //const newResult = result.map(item => item.friendId);
+
+        //get only the frirndId's by mapping over result array
+        //const friendIds = result.map(doc => doc.friendId);
+
 
         const wholeUser = {
             user: friend, // Assuming you meant to use `friend` instead of `user`
             posts:posts,
             friendDetails: friendDetailsOfUser,
+            isFriend:result
         };
 
         res.status(200).json({
