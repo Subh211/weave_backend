@@ -250,8 +250,8 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
             res.status(200).json({
                 success: true,
                 message: "feed",
-                data: unlikedPosts,
-                username:usersName
+                username:usersName,
+                data: unlikedPosts
             });
 
         } catch (error: any) {
