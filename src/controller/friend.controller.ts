@@ -4,6 +4,8 @@ import User from "../Models/user.schema";
 import AppError from "../Utils/appError";
 import Friend from "../Models/friend.schema";
 import Notification from "../Models/notification.schema";
+const { ObjectId } = require('mongodb'); // Make sure to import ObjectId if you're using MongoDB
+
 
 
 interface makeFriendRequest extends Request {
@@ -186,17 +188,39 @@ try {
     const userIdObject = new mongoose.Types.ObjectId(userId);
     const friendIdObject =new mongoose.Types.ObjectId(friendId);
 
-    //Serach through the myFriend collection and delete friend's details from my 'following' array
-    await Friend.updateOne(
-        { userId: userIdObject },
-        { $pull: { following: { friendId: friendIdObject } } }
-    )
+    // //Serach through the myFriend collection and delete friend's details from my 'following' array
+    // await Friend.updateOne(
+    //     { userId: userIdObject },
+    //     { $pull: { following: { friendId: friendIdObject } } }
+    // )
 
-    //Serach through the friends 'friends' collection and delete users details from my 'followers' array
-    await Friend.updateOne(
-        { userId: userIdObject },
-        { $pull: { followers: { friendId: userIdObject } } }
-    )
+    // //Serach through the friends 'friends' collection and delete users details from my 'followers' array
+    // await Friend.updateOne(
+    //     { userId: userIdObject },
+    //     { $pull: { followers: { friendId: userIdObject } } }
+    // )
+
+    async function removeFriendAndFollower(userId, friendId) {
+        const userIdObject = new ObjectId(userId);
+        const friendIdObject = new ObjectId(friendId);
+      
+        await Friend.bulkWrite([
+          {
+            updateOne: {
+              filter: { userId: userIdObject },
+              update: { $pull: { following: { friendId: friendIdObject } } }
+            }
+          },
+          {
+            updateOne: {
+              filter: { userId: friendIdObject },
+              update: { $pull: { followers: { friendId: userIdObject } } }
+            }
+          }
+        ]);
+      }
+
+     await removeFriendAndFollower(userId,friendId);
 
     //unfollowing notification for myself
     let myNotification = await Notification.findOne({userId});
