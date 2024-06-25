@@ -240,12 +240,18 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
                                 console.log("Likes not defined for post:", post); // Log if likes is not defined
                             }
                         }
+            
+            
+            //find the displayName of the user
+            const usersDetails = await User.findById(userId);
+            const usersName = usersDetails!.displayName;
 
 
             res.status(200).json({
                 success: true,
                 message: "feed",
                 data: unlikedPosts,
+                username:usersName
             });
 
         } catch (error: any) {
