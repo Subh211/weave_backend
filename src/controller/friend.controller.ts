@@ -195,7 +195,7 @@ try {
     //Serach through the friends 'friends' collection and delete users details from my 'followers' array
     await Friend.updateOne(
         { userId: userIdObject },
-        { $pull: { followers: { friendId: friendIdObject } } }
+        { $pull: { followers: { friendId: userIdObject } } }
     )
 
     //unfollowing notification for myself
