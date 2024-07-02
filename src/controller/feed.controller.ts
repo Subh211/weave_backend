@@ -16,6 +16,12 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 
+interface getFriendFeed extends Request {
+    params: {
+        friendId: string;
+    };
+}
+
 
 const feed = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -262,4 +268,171 @@ const feed = async (req: Request, res: Response, next: NextFunction) => {
     };
 
 
-export { feed }
+
+const myFeed = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        //get the userId from jwtAuthMiddleware and convert it into userIdObject
+        const userId = req.user?.id;
+        const userIdObject = new mongoose.Types.ObjectId(userId);
+
+        //interface for postdetail array
+        type PostDetail = {
+            usersId?: string | any;
+            postId?: string | undefined;
+            image_public_id?: string | undefined;
+            image_secure_url?: string | undefined;
+            name: string | undefined;
+            caption: string | undefined;
+            likes: { userId?: string; userName?: string; isLiked?: boolean , userImage?: string}[] | undefined;
+            comments: { comment: string; userId: string; userName: string , userImage?: string}[] | undefined;
+            picture_public_id: string | undefined;
+            picture_secure_url: string | undefined;
+        };
+
+        //define totalPoasts as a empty array
+        let totalPosts: PostDetail[] = [];
+
+            //find the user from User
+            const user = await User.findOne({ _id: userIdObject });
+
+            //get his displayname and profile picture and secureUrl
+            const userName = user?.displayName;
+            const userSecureImageUrl = user?.photoURL?.secure_url;
+            const userImagePublicId = user?.photoURL?.public_id;
+        
+             //get the users all posts from Post
+             const post = await Post.findOne({ userId: userIdObject });
+
+            //first check if he has any posts or not
+            const userPostDetails = post?.posts;
+
+            //if he has any posts
+            if (userPostDetails) {
+
+                 //now loop through the every post of that user
+                 for (let j = 0; j < userPostDetails.length; j++) {
+
+                     //define the currentPostId
+                     let currentPostId = userPostDetails[j]._id;
+
+                     //if current PostId found---
+                     if (currentPostId) {
+
+                             //fill the details 
+                             const eachPosts: PostDetail = {
+                                 postId:currentPostId,
+                                 usersId:userId,
+                                 image_public_id:userImagePublicId,
+                                 image_secure_url:userSecureImageUrl,
+                                 name: userName,
+                                 caption: userPostDetails[j].caption,
+                                 likes: userPostDetails[j].likes,
+                                 comments: userPostDetails[j].comments?.map(comment => ({
+                                     comment: comment.comment || "",
+                                     userId: comment.userId || "",
+                                     userName: comment.userName || "",
+                                     userImage:comment.userImage || "",
+                                 })),
+                                 picture_public_id: userPostDetails[j]?.image?.public_id,
+                                 picture_secure_url: userPostDetails[j]?.image?.secure_url
+                             };
+
+                             //now push each posts to the totalPost array
+                             totalPosts.push(eachPosts);
+                        
+                     }
+                 }
+             }
+
+    } catch (error:any) {
+        //error handling
+        console.error("Error fetching feed:", error);
+        next(new AppError("Internal server error", 500));
+    }
+}
+
+
+
+const friendFeed = async (req: getFriendFeed, res: Response, next: NextFunction) => {
+    try {
+        //get the friendID from jwtAuthMiddleware and convert it into userIdObject
+        const { friendId } = req.params;
+        const friendIdObject = new mongoose.Types.ObjectId(friendId);
+
+        //interface for postdetail array
+        type PostDetail = {
+            friendsId?: string | any;
+            postId?: string | undefined;
+            image_public_id?: string | undefined;
+            image_secure_url?: string | undefined;
+            name: string | undefined;
+            caption: string | undefined;
+            likes: { userId?: string; userName?: string; isLiked?: boolean , userImage?: string}[] | undefined;
+            comments: { comment: string; userId: string; userName: string , userImage?: string}[] | undefined;
+            picture_public_id: string | undefined;
+            picture_secure_url: string | undefined;
+        };
+
+        //define totalPoasts as a empty array
+        let totalPosts: PostDetail[] = [];
+
+            //find the user from User
+            const user = await User.findOne({ _id: friendIdObject });
+
+            //get his displayname and profile picture and secureUrl
+            const userName = user?.displayName;
+            const userSecureImageUrl = user?.photoURL?.secure_url;
+            const userImagePublicId = user?.photoURL?.public_id;
+        
+             //get the users all posts from Post
+             const post = await Post.findOne({ userId: friendIdObject });
+
+            //first check if he has any posts or not
+            const userPostDetails = post?.posts;
+
+            //if he has any posts
+            if (userPostDetails) {
+
+                 //now loop through the every post of that user
+                 for (let j = 0; j < userPostDetails.length; j++) {
+
+                     //define the currentPostId
+                     let currentPostId = userPostDetails[j]._id;
+
+                     //if current PostId found---
+                     if (currentPostId) {
+
+                             //fill the details 
+                             const eachPosts: PostDetail = {
+                                 postId:currentPostId,
+                                 friendsId:friendId,
+                                 image_public_id:userImagePublicId,
+                                 image_secure_url:userSecureImageUrl,
+                                 name: userName,
+                                 caption: userPostDetails[j].caption,
+                                 likes: userPostDetails[j].likes,
+                                 comments: userPostDetails[j].comments?.map(comment => ({
+                                     comment: comment.comment || "",
+                                     userId: comment.userId || "",
+                                     userName: comment.userName || "",
+                                     userImage:comment.userImage || "",
+                                 })),
+                                 picture_public_id: userPostDetails[j]?.image?.public_id,
+                                 picture_secure_url: userPostDetails[j]?.image?.secure_url
+                             };
+
+                             //now push each posts to the totalPost array
+                             totalPosts.push(eachPosts);
+                        
+                     }
+                 }
+             }
+
+    } catch (error:any) {
+        //error handling
+        console.error("Error fetching feed:", error);
+        next(new AppError("Internal server error", 500));
+    }
+}
+
+export { feed , myFeed , friendFeed }

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { jwtAuth } from "../MiddleWare/jwtAuth";
-import { feed } from "../controller/feed.controller";
+import { feed, friendFeed, myFeed } from "../controller/feed.controller";
 
 const feedRouter = Router();
 
@@ -8,4 +8,12 @@ feedRouter
     .route('/feed')
     .post(jwtAuth ,feed)
 
-    export default feedRouter;
+feedRouter
+    .route('/feed/user')
+    .post(jwtAuth ,myFeed)
+
+feedRouter
+    .route('/feed/:friendId')
+    .post(friendFeed)    
+
+export default feedRouter;
