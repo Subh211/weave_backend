@@ -344,6 +344,13 @@ const myFeed = async (req: Request, res: Response, next: NextFunction) => {
                  }
              }
 
+             res.status(200).json({
+                success: true,
+                message: "feed",
+                data: totalPosts
+            });
+
+
     } catch (error:any) {
         //error handling
         console.error("Error fetching feed:", error);
@@ -427,6 +434,13 @@ const friendFeed = async (req: getFriendFeed, res: Response, next: NextFunction)
                      }
                  }
              }
+
+             res.status(200).json({
+                success: true,
+                message: "feed",
+                data: totalPosts
+            });
+
 
     } catch (error:any) {
         //error handling
