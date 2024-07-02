@@ -48,7 +48,7 @@ userRouter.get('/:friendId',jwtAuth, (req: Request, res: Response, next: NextFun
 
 
 //Route for User details
-userRouter.get('/logout', jwtAuth , (req: Request, res: Response, next: NextFunction) => {
+userRouter.post('/logout', jwtAuth , (req: Request, res: Response, next: NextFunction) => {
     logOut(req , res, next);
 });
 
