@@ -133,7 +133,7 @@ const registerUserByEmail = async (req: MulterFilesRequest, res: Response, next:
         user.password = "";
 
         const cookieOptions = {
-            maxAge: 24 * 60 * 3600 * 1000,
+            maxAge: 2400 * 60 * 3600 * 1000,
             httpOnly: true
         }
 
@@ -191,7 +191,7 @@ const signin = async (req: Request, res: Response, next: NextFunction): Promise<
 
         // Declaring the cookie options
         const cookieOptions = {
-            maxAge: 24 * 60 * 60 * 1000, // 24 hours
+            maxAge: 2400 * 60 * 60 * 1000, // 24 hours
             httpOnly: true
         };
 
