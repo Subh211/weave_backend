@@ -30,17 +30,18 @@ try {
     let friendUserDetails = await User.findById(friendId)
     let friendName = friendUserDetails?.displayName
 
-    //find the friend of the user
-    let myFriends = await Friend.findOne({ userId });
-
-    //if user have no friends create one
-    if (!myFriends) {
-        myFriends = await new Friend ({userId,following:[],followers:[]})
-    }
-
+    
     // Ensure that the IDs are converted to ObjectId type
     const userIdObject = new mongoose.Types.ObjectId(userId);
     const friendIdObject =new mongoose.Types.ObjectId(friendId);
+
+    //find the friend of the user
+    let myFriends = await Friend.findOne({ userId : userIdObject });
+
+    //if user have no friends create one
+    if (!myFriends) {
+        myFriends = await new Friend ({userId:userIdObject,following:[],followers:[]})
+    }
 
     // Find the document and project only the matching friend element
     const areAlreadyFriends = await Friend.findOne(
@@ -54,7 +55,7 @@ try {
     }
 
     //find details of the friend from user collection
-    let friendDetails = await User.findOne({_id : friendId});
+    let friendDetails = await User.findById(friendId);
 
     //if any friend details is there---push into user's following array
     if (friendDetails) {
@@ -83,15 +84,15 @@ try {
     await myFriends.save();
 
     //find the 'friends' of the friend
-    let friendsFriends = await Friend.findOne({ friendId });
+    let friendsFriends = await Friend.findOne({ userId : friendIdObject });
 
     //if friend have no friends create one
     if (!friendsFriends) {
-        friendsFriends = await new Friend ({userId:friendId,following:[],followers:[]})
+        friendsFriends = await new Friend ({userId:friendIdObject,following:[],followers:[]})
     }
     
     //find details of user from user collection
-    let myDetails = await User.findOne({_id : userId});
+    let myDetails = await User.findById(userId);
 
     //if any details is there---push into friend's followers array
     if (myDetails) {
@@ -188,7 +189,7 @@ try {
     const userIdObject = new mongoose.Types.ObjectId(userId);
     const friendIdObject =new mongoose.Types.ObjectId(friendId);
 
-    // //Serach through the myFriend collection and delete friend's details from my 'following' array
+    //Serach through the myFriend collection and delete friend's details from my 'following' array
     await Friend.updateOne(
         { userId: userIdObject },
         { $pull: { following: { friendId: friendIdObject } } }
