@@ -1085,7 +1085,7 @@ const allUser = async ( req: Request , res: Response, next: NextFunction ): Prom
         // Map the users to the desired format
         const formattedUsers = users.map(user => ({
           displayName: user.displayName,
-          id: user.id.toString(),
+          //id: user.id.toString(),
           photoURL: user.photoURL!.secure_url
         }));
     
