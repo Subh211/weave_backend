@@ -1094,6 +1094,13 @@ const allUser = async ( req: Request , res: Response, next: NextFunction ): Prom
           photoURL: user.photoURL!.secure_url
         }));
     
+        // Sort the formatted users array alphabetically by displayName
+        formattedUsers.sort((a, b) => {
+            if (a.displayName.toLowerCase() < b.displayName.toLowerCase()) return -1;
+            if (a.displayName.toLowerCase() > b.displayName.toLowerCase()) return 1;
+            return 0;
+        });
+
         // Send the formatted users array as the response
         res.status(200).json({
             success:true,
