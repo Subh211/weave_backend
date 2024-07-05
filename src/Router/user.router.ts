@@ -41,9 +41,9 @@ userRouter.get('/user', jwtAuth , (req: Request, res: Response, next: NextFuncti
 });
 
 
-//Route for User details
-userRouter.get('/:friendId',jwtAuth, (req: Request, res: Response, next: NextFunction) => {
-    friendDetails(req , res, next);
+//Get all user details
+userRouter.get('/alluser',(req: Request, res: Response, next: NextFunction) => {
+    allUser(req , res, next);
 });
 
 
@@ -70,11 +70,11 @@ userRouter.delete('/delete', jwtAuth , (req: Request, res: Response, next: NextF
     deleteUser(req,res,next);
 })
 
-
-//Get all user details
-userRouter.get('/alluser',(req: Request, res: Response, next: NextFunction) => {
-    allUser(req , res, next);
+//Route for User details
+userRouter.get('/:friendId',jwtAuth, (req: Request, res: Response, next: NextFunction) => {
+    friendDetails(req , res, next);
 });
+
 
 
 //Exporting userRouter
