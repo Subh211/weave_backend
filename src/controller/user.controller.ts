@@ -1077,6 +1077,36 @@ const deleteUser = async ( req: Request , res : Response , next: NextFunction ) 
 }
 
 
+const allUser = async ( req: Request , res: Response, next: NextFunction ): Promise <Response | void> => {
+    try {
+        // Fetch all users from the database
+        const users = await User.find();
+    
+        // Map the users to the desired format
+        const formattedUsers = users.map(user => ({
+          displayName: user.displayName,
+          id: user._id,
+          photoURL: user.photoURL!.secure_url
+        }));
+    
+        // Send the formatted users array as the response
+        res.status(200).json({
+            success:true,
+            allUser:formattedUsers
+        });
+      } catch (error) {
+        // Handle any errors
+        if (error instanceof Error) {
+            next(new AppError(`Internal server error: ${error.message}`, 500));
+        } else {
+            next(new AppError("Internal server error", 500));
+        }
+    }
+}
+
+
+
+
 //Exporting user functions
 export { registerUserByEmail,  
         signin , 
@@ -1085,4 +1115,6 @@ export { registerUserByEmail,
         logOut , 
         changePassword , 
         updateUser ,
-        deleteUser};
+        deleteUser,
+        allUser
+    };

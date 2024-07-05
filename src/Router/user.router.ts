@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response, Router } from "express";
-import {  MulterFilesRequest , changePassword, deleteUser, friendDetails, logOut, registerUserByEmail, signin, updateUser, userDetails }from "../controller/user.controller";
+import {  MulterFilesRequest , allUser, changePassword, deleteUser, friendDetails, logOut, registerUserByEmail, signin, updateUser, userDetails }from "../controller/user.controller";
 import upload from "../MiddleWare/multer.middleware";
 import session from 'express-session';
 import { jwtAuth } from "../MiddleWare/jwtAuth";
@@ -69,6 +69,13 @@ userRouter.put('/update-user', jwtAuth , upload.single('photoURL') , (req: Reque
 userRouter.delete('/delete', jwtAuth , (req: Request, res: Response, next: NextFunction) => {
     deleteUser(req,res,next);
 })
+
+
+//Get all user details
+userRouter.get('/alluser',(req: Request, res: Response, next: NextFunction) => {
+    allUser(req , res, next);
+});
+
 
 //Exporting userRouter
 export default userRouter;
