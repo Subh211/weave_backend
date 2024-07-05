@@ -15,6 +15,9 @@ import Friend from '../Models/friend.schema';
 
 // Extend the Request interface to include files for array-based uploads
 export interface MulterFilesRequest extends Request {
+    params: {
+        friendId: string;
+    };
     file?: Express.Multer.File;
     bio?: string;
     name: string;
@@ -272,7 +275,9 @@ const friendDetails = async (req: Request, res: Response, next: NextFunction): P
     const userId = req.user?.id;
     
     // Extract friendId from req.params
-    const friendId: string | undefined = req.params.friendId;
+    //const friendId: string | undefined = req.params.friendId;
+    const { friendId } = req.params;
+
 
     if (!friendId) {
         return next(new AppError('Friend ID not provided', 400));
@@ -1085,7 +1090,7 @@ const allUser = async ( req: Request , res: Response, next: NextFunction ): Prom
         // Map the users to the desired format
         const formattedUsers = users.map(user => ({
           displayName: user.displayName,
-          //id: user.id.toString(),
+          id: user.id.toString(),
           photoURL: user.photoURL!.secure_url
         }));
     
