@@ -89,7 +89,7 @@ export const jwtToken = (user: IUser): string => {
     return JWT.sign(
         { id: user._id, email: user.email ,displayName: user.displayName},
         process.env.SECRET as string,
-        { expiresIn: '24h' }
+        { expiresIn: '365d' }
     );
 };
 
