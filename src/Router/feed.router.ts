@@ -14,6 +14,6 @@ feedRouter
 
 feedRouter
     .route('/feed/:friendId')
-    .post(jwtAuth,friendFeed)    
+    .post(friendFeed)    
 
 export default feedRouter;
