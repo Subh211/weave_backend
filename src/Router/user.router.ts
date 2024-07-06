@@ -42,7 +42,7 @@ userRouter.get('/user', jwtAuth , (req: Request, res: Response, next: NextFuncti
 
 
 //Get all user details
-userRouter.get('/alluser',(req: Request, res: Response, next: NextFunction) => {
+userRouter.get('/alluser', jwtAuth ,(req: Request, res: Response, next: NextFunction) => {
     allUser(req , res, next);
 });
 
