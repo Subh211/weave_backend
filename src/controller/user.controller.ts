@@ -1084,11 +1084,19 @@ const deleteUser = async ( req: Request , res : Response , next: NextFunction ) 
 
 const allUser = async ( req: Request , res: Response, next: NextFunction ): Promise <Response | void> => {
     try {
+        //Get userId from jwtAuth middleware
+        const userId = req.user?.id;
+
+        //Find the user by unique user ID
+        const user = await User.findById(userId);
+        const username = user?.displayName;
+
         // Fetch all users from the database
         const users = await User.find();
     
         // Map the users to the desired format
         const formattedUsers = users.map(user => ({
+          username: username,
           displayName: user.displayName,
           id: user.id.toString(),
           photoURL: user.photoURL!.secure_url
