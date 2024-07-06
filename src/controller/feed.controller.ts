@@ -277,7 +277,7 @@ const myFeed = async (req: Request, res: Response, next: NextFunction) => {
 
         //interface for postdetail array
         type PostDetail = {
-            isLiked: Boolean;
+            isLiked: boolean | any;
             usersId?: string | any;
             postId?: string | undefined;
             image_public_id?: string | undefined;
@@ -393,7 +393,7 @@ const friendFeed = async (req: getFriendFeed, res: Response, next: NextFunction)
 
         //interface for postdetail array
         type PostDetail = {
-            isLiked:Boolean,
+            isLiked:boolean | any,
             friendsId?: string | any;
             postId?: string | undefined;
             image_public_id?: string | undefined;
