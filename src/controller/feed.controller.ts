@@ -277,7 +277,7 @@ const myFeed = async (req: Request, res: Response, next: NextFunction) => {
 
         //interface for postdetail array
         type PostDetail = {
-            isLiked: boolean | any;
+            isLiked: any;
             usersId?: string | any;
             postId?: string | undefined;
             image_public_id?: string | undefined;
@@ -326,16 +326,28 @@ const myFeed = async (req: Request, res: Response, next: NextFunction) => {
                         const result = await Post.aggregate([
                             { $match: { userId: userIdObject } }, // Match the specific user
                             { $unwind: "$posts" }, // Flatten the posts array
-                            { $match: { "posts._id": currentPostIdObject } }, // Match the specific post
+                            { $match: { "posts._id": currentPostId } }, // Match the specific post
                             { $project: { _id: 0, likes: "$posts.likes" } } // Project only the likes array
                           ]);
+
+                          if (!result) {
+                            next(new AppError("No result", 500));
+                          }
 
                           //make them to string
                           const newResult = result.map(item => item.userId.toString());
 
+                          
+                          if (!newResult) {
+                            next(new AppError("No new result", 500));
+                          }
+
                           //check if it already liked or not
                           const isLiked = newResult.includes(userId?.toString());
 
+                          if (!isLiked) {
+                            next(new AppError("No is", 500));
+                          }
 
                              //fill the details 
                              const eachPosts: PostDetail = {
