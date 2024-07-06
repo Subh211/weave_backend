@@ -277,6 +277,7 @@ const myFeed = async (req: Request, res: Response, next: NextFunction) => {
 
         //interface for postdetail array
         type PostDetail = {
+            isLiked: Boolean;
             usersId?: string | any;
             postId?: string | undefined;
             image_public_id?: string | undefined;
@@ -318,8 +319,24 @@ const myFeed = async (req: Request, res: Response, next: NextFunction) => {
                      //if current PostId found---
                      if (currentPostId) {
 
+                        //make 
+                        const currentPostIdObject = new mongoose.Types.ObjectId(currentPostId);
+
+                        const result = await Post.aggregate([
+                            { $match: { _id: userIdObject } }, // Match the specific user
+                            { $unwind: "$posts" }, // Flatten the posts array
+                            { $match: { "posts._id": currentPostIdObject } }, // Match the specific post
+                            { $project: { _id: 0, likes: "$posts.likes" } } // Project only the likes array
+                          ]);
+
+                          const newResult = result.map(item => item.userId.toString());
+
+                          const isLiked = newResult.includes(userId?.toString());
+
+
                              //fill the details 
                              const eachPosts: PostDetail = {
+                                 isLiked:isLiked,
                                  postId:currentPostId,
                                  usersId:userId,
                                  image_public_id:userImagePublicId,
