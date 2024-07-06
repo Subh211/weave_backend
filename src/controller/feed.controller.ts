@@ -319,18 +319,21 @@ const myFeed = async (req: Request, res: Response, next: NextFunction) => {
                      //if current PostId found---
                      if (currentPostId) {
 
-                        //make 
+                        //make the currentPostId as object
                         const currentPostIdObject = new mongoose.Types.ObjectId(currentPostId);
 
+                        //get all the likes of the current post
                         const result = await Post.aggregate([
-                            { $match: { _id: userIdObject } }, // Match the specific user
+                            { $match: { userId: userIdObject } }, // Match the specific user
                             { $unwind: "$posts" }, // Flatten the posts array
                             { $match: { "posts._id": currentPostIdObject } }, // Match the specific post
                             { $project: { _id: 0, likes: "$posts.likes" } } // Project only the likes array
                           ]);
 
+                          //make them to string
                           const newResult = result.map(item => item.userId.toString());
 
+                          //check if it already liked or not
                           const isLiked = newResult.includes(userId?.toString());
 
 
@@ -379,12 +382,18 @@ const myFeed = async (req: Request, res: Response, next: NextFunction) => {
 
 const friendFeed = async (req: getFriendFeed, res: Response, next: NextFunction) => {
     try {
+        //get the userId from jwtAuthMiddleware and convert it into userIdObject
+        const userId = req.user?.id;
+        const userIdObject = new mongoose.Types.ObjectId(userId);
+
+
         //get the friendID from jwtAuthMiddleware and convert it into userIdObject
         const { friendId } = req.params;
         const friendIdObject = new mongoose.Types.ObjectId(friendId);
 
         //interface for postdetail array
         type PostDetail = {
+            isLiked:Boolean,
             friendsId?: string | any;
             postId?: string | undefined;
             image_public_id?: string | undefined;
@@ -426,8 +435,27 @@ const friendFeed = async (req: getFriendFeed, res: Response, next: NextFunction)
                      //if current PostId found---
                      if (currentPostId) {
 
+                        //make the currentPostId as object
+                        const currentPostIdObject = new mongoose.Types.ObjectId(currentPostId);
+
+                        //get all the likes of the current post
+                        const result = await Post.aggregate([
+                            { $match: { userId: friendIdObject } }, // Match the specific user
+                            { $unwind: "$posts" }, // Flatten the posts array
+                            { $match: { "posts._id": currentPostIdObject } }, // Match the specific post
+                            { $project: { _id: 0, likes: "$posts.likes" } } // Project only the likes array
+                          ]);
+
+                          //make them to string
+                          const newResult = result.map(item => item.userId.toString());
+
+                          //check if it already liked or not
+                          const isLiked = newResult.includes(userId?.toString());
+
+
                              //fill the details 
                              const eachPosts: PostDetail = {
+                                 isLiked:isLiked,
                                  postId:currentPostId,
                                  friendsId:friendId,
                                  image_public_id:userImagePublicId,
