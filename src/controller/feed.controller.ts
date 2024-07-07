@@ -274,6 +274,11 @@ const myFeed = async (req: Request, res: Response, next: NextFunction) => {
     try {
         //get the userId from jwtAuthMiddleware and convert it into userIdObject
         const userId = req.user?.id;
+
+        if (!userId) {
+            return next(new AppError("User ID not found", 400));
+        }
+
         const userIdObject = new mongoose.Types.ObjectId(userId);
 
         //interface for postdetail array
