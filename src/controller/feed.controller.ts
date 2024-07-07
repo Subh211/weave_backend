@@ -278,6 +278,7 @@ const myFeed = async (req: Request, res: Response, next: NextFunction) => {
 
         //interface for postdetail array
         type PostDetail = {
+            isLiked?: boolean | any;
             usersId?: string | any;
             postId?: string | undefined;
             image_public_id?: string | undefined;
@@ -319,8 +320,16 @@ const myFeed = async (req: Request, res: Response, next: NextFunction) => {
                      //if current PostId found---
                      if (currentPostId) {
 
+                        const allLikes = userPostDetails[j].likes;
+
+                        
+                        const newResult = allLikes!.map(item => item.userId!.toString());
+
+                        const isLiked = newResult.includes(userId?.toString());
+
                              //fill the details 
                              const eachPosts: PostDetail = {
+                                 isLiked:isLiked,
                                  postId:currentPostId,
                                  usersId:userId,
                                  image_public_id:userImagePublicId,
