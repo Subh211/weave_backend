@@ -325,11 +325,13 @@ const myFeed = async (req: Request, res: Response, next: NextFunction) => {
                      //if current PostId found---
                      if (currentPostId) {
 
+                        //get all the likes of the post
                         const allLikes = userPostDetails[j].likes;
 
-                        
+                        //map the userIds in a new array newResult
                         const newResult = allLikes!.map(item => item.userId!.toString());
 
+                        //check if newResuly consists of my userId or not
                         const isLikedByUser = newResult.includes(userId.toString());
 
                              //fill the details 
@@ -377,12 +379,20 @@ const myFeed = async (req: Request, res: Response, next: NextFunction) => {
 
 const friendFeed = async (req: getFriendFeed, res: Response, next: NextFunction) => {
     try {
+        //get the userId from jwtAuthMiddleware and convert it into userIdObject
+        const userId = req.user?.id;
+
+        if (!userId) {
+            return next(new AppError("User ID not found", 400));
+        }
+
         //get the friendID from jwtAuthMiddleware and convert it into userIdObject
         const { friendId } = req.params;
         const friendIdObject = new mongoose.Types.ObjectId(friendId);
 
         //interface for postdetail array
         type PostDetail = {
+            isLiked?: boolean | any;
             friendsId?: string | any;
             postId?: string | undefined;
             image_public_id?: string | undefined;
@@ -424,8 +434,18 @@ const friendFeed = async (req: getFriendFeed, res: Response, next: NextFunction)
                      //if current PostId found---
                      if (currentPostId) {
 
+                        //get all the likes of the post
+                        const allLikes = userPostDetails[j].likes;
+
+                        //map the userIds in an new array
+                        const newResult = allLikes!.map(item => item.userId!.toString());
+
+                        //check if newResult array consists of userId or not
+                        const isLikedByUser = newResult.includes(userId.toString());
+
                              //fill the details 
                              const eachPosts: PostDetail = {
+                                 isLiked: isLikedByUser,
                                  postId:currentPostId,
                                  friendsId:friendId,
                                  image_public_id:userImagePublicId,
