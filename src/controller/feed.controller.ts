@@ -330,11 +330,11 @@ const myFeed = async (req: Request, res: Response, next: NextFunction) => {
                         
                         const newResult = allLikes!.map(item => item.userId!.toString());
 
-                        const isLiked = newResult.includes(userId.toString());
+                        const isLikedByUser = newResult.includes(userId.toString());
 
                              //fill the details 
                              const eachPosts: PostDetail = {
-                                 isLiked:isLiked,
+                                 isLiked:isLikedByUser,
                                  postId:currentPostId,
                                  usersId:userId,
                                  image_public_id:userImagePublicId,
